@@ -1,0 +1,26 @@
+{
+"name": "ThoseCursedTreasures",
+"short_name": "ThoseCursedTreasures",
+"start_url": "/",
+"display": "standalone",
+"description": "Board game Expansion",
+"lang": " English",
+"dir": "auto",
+"theme_color": "#000000",
+"background_color": "#000000",
+"orientation": "any",
+"icons": [
+    {
+        "src": "images/icon-512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "maskable"
+    },
+    {
+        "src": "images/icon-192.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "any"
+    }
+]
+}

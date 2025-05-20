@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#b45f06">
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Those Cursed Treasures</title>
+    <style>
+        
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f4f1e6;
+            /* Light parchment color */
+            background-image: url('images/parchment-map.png');
+            background-repeat: repeat;
+            background-attachment: fixed;
+            background-position: center center;
+            color: #6a4e23;
+            /* Earthy brown for text */
+        }
+
+        body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 245, 220, 0.6);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+        h1 {
+            text-align: center;
+            color: #b45f06;
+            /* Treasure theme */
+            font-size: 2.5rem;
+            margin-top: 0.2rem;      
+        }
+
+.settings {
+  display: flex;
+    justify-content: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+  margin-top: 0.5rem; 
+  font-size: 0.9rem;
+}
+.settings label { cursor: pointer; }
+.settings select { margin-left: 0.3rem; }
+
+.settings-container {
+  display: inline-flex;      
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0.5rem auto;   
+  background: rgba(255, 255, 255, 0.219); /* opaque white */
+  padding: 8px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  margin: 0.5rem auto;  /* center it and retain your spacing */
+  max-width: 560px;     /* optional cap width */
+}
+
+/* keep existing collapsed behaviour */
+.settings-container .settings.collapsed {
+  display: none;
+}
+
+
+#settingsToggle {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #6a4e23;
+}
+
+.settings.collapsed {
+  display: none;
+}
+
+
+
+.subtitle {
+  text-align: center;           /* center it under the controls */
+  font-family: Arial, Helvetica, sans-serif; /* or your chosen font */
+  font-size: 1.2rem;            /* smaller than the H1 */
+  margin: 0;                    /* remove default top/bottom margins */
+  padding: 0;
+  color: #4e342e;               /* a darker brown to distinguish it */
+  line-height: 1.1;             /* very tight spacing */
+}
+
+
+.container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 280px));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  justify-content: center;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+
+
+.player-info {
+  position: relative;
+  background-color: #fffaf3; /* base parchment-like tone */
+  background-image:
+    url('images/parchment-player2.png'),
+    linear-gradient(#fffaf3, #fffaf3);  /* fallback tone */
+  background-size: cover;
+  background-blend-mode: multiply;
+  border: 2px solid #8c7b5a;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s, border 0.3s;
+}
+
+.player-info::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url('images/parchment-tile.png') center/cover;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  z-index: 0;
+
+  /* ↓ lower this for a lighter texture: */
+  opacity: 0.05;
+}
+
+.player-info > * {
+  position: relative;
+  z-index: 1;
+}
+
+
+        .player-info.selected {
+            background-color: #ffeb3b;
+            /* Yellow background for selected player */
+            border: 2px solid #ff9800;
+            /* Bright orange border */
+        }
+
+        .player-info button {
+            font-weight: bold;
+            background-color: #8c7b5a;
+            color: white;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+            width: 100%;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .player-info button:hover {
+            background-color: #4e7331;
+        }
+
+/* make the name+× sit side by side */
+.player-name-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 10px;  /* give a bit of space before the rest of the card */
+}
+
+/* your name button fills all the leftover space */
+.player-name-bar .name-btn {
+  flex: 1;
+  text-align: center;
+  background-color: #8c7b5a;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.player-name-bar .name-btn:hover {
+  background-color: #333;
+}
+
+/* override absolute‐positioned remove‐btn and keep it inline */
+.player-name-bar .remove-btn {
+  position: static;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  line-height: 1;
+  color: #e53935;
+  cursor: pointer;
+}
+
+
+      /* make just the little remove-button auto-size again */
+.player-info .remove-btn {
+  width: auto !important;
+  padding: 2px 6px;    /* a little breathing room */
+  height: auto;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.player-info .remove-btn:hover {
+  background-color: #333;
+}
+  
+
+/* Highlight candidate boards */
+.player-info.highlight-target {
+  background-color: #fffae6;      /* pale yellow */
+  border: 2px solid #ff9800;      /* bright orange */
+  transition: background 0.3s;
+}
+
+
+/* keep the normal hover background, even when cursed, and preserve red text */
+.player-info.cursed .name-btn:hover {
+  background-color: #333; /* your normal hover BG */
+}
+
+
+/* Confirmation dialog (mirrors result-box style) */
+.confirm-box {
+  display: none;              /* start hidden */
+  background: #fff3cd;
+  border-left: 5px solid #ff9800;
+  padding: 12px 16px;
+  margin: 10px auto;
+  width: 90%;
+  max-width: 400px;
+  color: #6a4e23;
+  position: relative;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  z-index: 10001;
+}
+
+/* “×” to close the confirm box */
+.confirm-box button.clear-result {
+  position: absolute;
+  top: 6px; right: 8px;
+  background: none; border: none;
+  font-size: 1.2rem; cursor: pointer;
+  color: #b45f06;
+}
+
+/* Yes/No buttons inside confirm */
+.confirm-box .btn {
+  margin: 0 8px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.confirm-box .btn-yes { background: #4e7331; color: white; }
+.confirm-box .btn-no  { background: #800020; color: white; }
+
+/* The “Pick target” banner */
+#throwBanner {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ff9800;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: bold;
+  z-index: 10000;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+.result-box {
+  background: #fff3cd;
+  border-left: 5px solid #ff9800;
+  padding: 12px 16px;
+  margin: 10px auto;
+  width: 90%;
+  max-width: 400px;
+  color: #6a4e23;
+  font-size: 1rem;
+  position: relative;
+  border-radius: 4px;
+}
+
+.result-box button.clear-result {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #b45f06;
+}
+
+
+        .curse {
+            font-style: italic;
+            margin-top: 10px;
+            background: #d4af37;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        /* override to burgundy only on actually cursed cards */
+        .player-info.cursed .curse {
+            background: #800020;
+        }
+
+        .token {
+            margin-top: 10px;
+            font-weight: bold;
+            /* Make the treasures bold */
+        }
+
+        .benefit {
+            margin-top: 10px;
+            background: #fff3cd;
+            padding: 10px;
+            border-left: 5px solid #ff9800;
+            border-radius: 5px;
+            font-size: 0.95rem;
+            color: #6a4e23;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+
+        .clear-benefit-btn {
+            display: block;
+            margin-top: 10px;
+            background: none;
+            border: none;
+            color: #b45f06;
+            font-size: 0.9rem;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .clear-benefit-btn:hover {
+            color: white;
+        }
+
+/* Cleanse Benefit = green tab */
+.benefit.cleanse-benefit {
+  background: #e8f5e9;            /* pale green */
+  border-left: 5px solid #4e7331; /* your dark-green button color */
+}
+
+/* Purge Perk = yellow-orange tab */
+.benefit.purge-benefit {
+  background: #fff8e1;            /* pale yellow */
+  border-left: 5px solid #ff9800; /* your orange button color */
+}
+
+/* Cleanse Benefit: on hover, green accent */
+.benefit.cleanse-benefit .clear-benefit-btn:hover {
+  background-color: #4e7331;  /* same as your .btn-action green */
+}
+
+/* Purge Perk: on hover, orange accent */
+.benefit.purge-benefit .clear-benefit-btn:hover {
+  background-color: #ff9800;  /* same as your .btn-yellow */
+}
+
+
+
+        /* A full-width silver banner at the top of the game area */
+        .shrine-banner {
+            background: #e0e0e0;
+            border: 2px solid #aaa;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+        }
+
+        /* when collapsed, only wrap the icon, not full-width */
+.shrine-banner.collapsed {
+  display: inline-flex;   /* shrink to contents */
+  width: auto !important; /* override any block-level width */
+  margin: 0 auto 5px;     /* keep bottom spacing, center it */
+  padding: 6px;           /* tighten up the padding now that it's small */
+}
+
+
+        .shrine-banner button {
+            background: #8c7b5a;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .shrine-banner button:hover {
+            background: #a08f6e;
+        }
+
+
+        /* Updated Stash Controls */
+        .stash-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            /* Decreased gap for a more compact look */
+            margin-top: 10px;
+        }
+
+        .stash-controls button {
+            width: 45px;
+            height: 45px;
+            font-size: 1.2rem;
+            /* Slightly smaller font for balance */
+            background-color: #ff9800;
+            /* Warm orange */
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            /* Subtle shadow for depth */
+        }
+
+        .stash-controls button:hover {
+            background-color: #f57c00;
+            /* Darker orange when hovered */
+            transform: scale(1.1);
+            /* Slight zoom effect for better feedback */
+        }
+
+        .stash-controls span {
+            font-size: 1.1rem;
+            /* Larger text for stash amount */
+            font-weight: bold;
+            color: #6a4e23;
+            /* Earthy brown for the stash text */
+        }
+
+        .controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .controls button {
+            padding: 10px 15px;
+            background-color: #4e7331;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 1.1rem;
+        }
+
+        .controls button:hover {
+            background-color: #e5f5d0;
+        }
+
+        /* keep your existing default */
+.controls button.btn-default { background-color: #4e7331; }
+
+/* darker green for your “do” buttons */
+.controls button.btn-action {
+  background-color: #3b531a;
+}
+
+/* burgundy for Throw Curse */
+.controls button.btn-burgundy {
+  background-color: #800020;
+}
+
+/* water‐blue for Rules & Undo */
+.controls button.btn-water {
+  background-color: #007ACC;
+}
+
+.controls button.btn-yellow {
+  background-color: #b45f06;
+}
+
+/* a simple hover effect for all of them */
+.controls button.btn-default:hover,
+.controls button.btn-action:hover,
+.controls button.btn-burgundy:hover,
+.controls button.btn-yellow:hover,
+.controls button.btn-water:hover{
+  background-color: #333;
+}
+
+        /* Expansion rules menu */
+.rules-menu {
+  display: none;
+  max-width: 800px;     /* or whatever your ideal “reading width” is */
+  width: 90%;
+  margin: 20px auto;    /* center + push content down */
+  padding: 20px;
+  background-color: #fff3cd;
+  border: 2px solid #8c7b5a;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  line-height: 1.6;
+}
+
+@media (max-width: 600px) {
+  .rules-menu {
+    width: 100%;
+    padding: 15px;
+    margin: 10px auto;
+    font-size: 0.9rem;
+  }
+}
+
+        .rules-menu h2,
+        .rules-menu h3 {
+            color: #b45f06;
+            margin-top: 10px;
+        }
+
+        .rules-menu ul {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .rules-menu li {
+            margin-bottom: 8px;
+        }
+
+        .rules-menu button {
+            background-color: #8c7b5a;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+            width: 100%;
+            font-size: 1rem;
+            margin-top: 15px;
+        }
+
+        .rules-menu button:hover {
+            background-color: #e5f5d0;
+            color: #4e342e;
+        }
+
+        .small-text {
+            font-size: 0.9rem;
+        }
+        .player-info.hit {
+    background-color: #ff4d4d !important; /* Bright red */
+    transition: background-color 0.3s ease;
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 1rem;
+  /* no background/padding here any more */
+}
+
+.header-content {
+  display: inline-block;  /* shrink to fit its children */
+  background: rgba(255, 255, 255, 0.4);
+  padding: 1rem 1.5rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  transition: all 0.2s ease;
+  /* remove any width:100% or max-width if you had it here */
+}
+
+
+.header-content.collapsed {
+  display: none;
+}
+
+#headerToggle {
+  position: absolute;
+  left: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #6a4e23;
+}
+
+
+
+    </style>
+</head>
+
+<body>
+<div class="header-container">
+  <button id="headerToggle" aria-expanded="true">▼</button>
+  <div class="header-content">
+    <h2 class="subtitle">The Quest for El Dorado:</h2>
+    <h1>Those Cursed Treasures</h1>
+    <p style="text-align: center;">
+    A homebrewed expansion for <strong>Reiner Knizia</strong>'s brilliant racing deck-builder. Conceived and implemented by <strong>Lost Sol.</strong> <br>
+Devised to be played with the base game using the cave's variant. <br>
+<strong>Extra things needed:</strong> <strong>2x</strong> (amount of boards used) <strong>tokens</strong> to represent Cursed Treasures</strong>, and <strong>1 token</strong> to represent the Shrine.</p>
+</p>
+  </div>
+</div>
+
+    
+    <!-- Controls to manage the game -->
+<div class="controls">
+
+  <div id="shrineBannerContainer"></div>
+  <button class="btn-default"   onclick="addPlayer()">Add Player</button>
+  <button class="btn-action"    onclick="drawTreasure()">Draw Treasure</button>
+  <button class="btn-action"    onclick="useRitual()">Use Cleansing Ritual</button>
+  <button class="btn-yellow"    onclick="purge()">Purge!</button>
+  <button class="btn-burgundy"  onclick="throwCurse()">Throw Curse</button>
+  <button class="btn-water"     onclick="toggleRulesMenu()">Rules</button>
+  <button class="btn-water"     onclick="undo()">Undo</button>
+</div>
+    <div id="throwResultBox" class="result-box" style="display:none;"></div>
+    <!-- Confirmation box for Remove Player -->
+<div id="removeConfirmBox" class="confirm-box"></div>
+<!-- for simple “OK”‐style warnings -->
+<div
+  id="messageBox"
+  class="confirm-box"
+  onclick="hideMessage()"
+></div>
+
+<!-- for one‐time results like Throw Curse -->
+<div id="resultBox" class="result-box"></div>
+
+
+
+    <!-- Rules Menu -->
+    <div class="rules-menu" id="rulesMenu">
+<h2>💰 Every Treasure Is Cursed</h2>
+<p><strong>Risk meets reward.</strong><br>Draw a treasure? You’re cursed—no exceptions.</p>
+
+<h3>⚙️ Setup:</h3>
+<ul>
+  <li>Set up a game as you would normally.</li>
+  <li>Place <strong>2 Cursed Treasures</strong> (any token that fits on a hex) per board used in your map construction.</li>
+  <li>Place treasures randomly or on hexes further from the most direct route to enhance their impact and temptation.</li>
+</ul>
+
+<h3>🛠️ How It Works:</h3>
+<ul>
+  <li>Approach a treasure on the map, if you are <strong>not</strong> cursed, <strong>draw a treasure</strong>.</li>
+  <li>Remove the token from the board.</li>
+  <li>Drawing a treasure <strong>always gives you a curse</strong>.</li>
+  <li>Curses take effect <strong>immediately</strong> and stay until cleansed.</li>
+  <li>You can only carry <strong>one curse at a time</strong>.</li>
+</ul>
+
+<h3>🧼 Cleansing Ritual:</h3>
+<ul>
+  <li>Pay the curse’s <strong>cleanse cost</strong> from your stash to perform a cleansing ritual.<i> <br>
+    (costs are randomly assigned at a 2:2:1 split 2,3,4 gold on Normal).</i></li>
+  <li>Cleansing removes the curse and <strong>grants a Cleansing Benefit </strong><i> <br>
+    (these are exclusive to the curse and reflect its severity, scaling with the cleanse cost).</i></li>
+  <li>These are <strong>not stackable</strong> and each new Cleansing Benefit will <strong>replace</strong> the last, if they haven't been satisfied already.</li>
+  <li>Once cleansed, you may draw treasures again.</li>
+  <li>Gold can be <strong>Stashed</strong> on your turn to save for a ritual or Purge!</li>
+  <li>As with card purchases, <strong>non-yellow cards count as half a coin</strong> when stashing gold.</li>
+</ul>
+
+<h3>⛩️ Shrines:</h3>
+<ul>
+  <li>After <strong>2–12 treasures</strong> have been drawn, a <strong>Shrine may appear randomly</strong>.</li>
+  <li>The Shrine allows a cursed player to <strong>cleanse their curse for free</strong> and still gain the cleanse benefit.</li>
+  <li><strong>Only one player</strong> may use the Shrine per appearance.</li>
+  <li>The active player will be asked to <strong>place</strong> the shrine (A unique token that fits on a hex, anything will do) an <strong>exact</strong> number of hexes away from their piece.
+  <li>The player can choose <strong>any hex that number of places away</strong>, making the shrine easier or more difficult to get to.</li>
+  <li>Shrines just need to be approached, much like Treasures, and the player can <strong>Use Shrine!</strong></li>
+</ul>
+
+<h3>📈 Scalable Cleanse Benefits:</h3>
+<ul>
+  <li>Curses offer <strong>increased rewards</strong> based on their cleanse cost.</li>
+  <li>The higher the curse’s cleanse cost, the <strong>greater the benefit</strong> when removed.<br>
+    (This is still true when the cleanse cost has been doubled as a result of a failed Throw Curse action. E.g. 8+ = blessings of Heroic proportions.)</li>
+</ul>
+
+<h3>Advanced:💥 Purge!</h3>
+<p>You may choose to <strong>double the cleanse cost</strong> of your curse to perform a Purge!</p>
+<p>Purge removes your curse and grants both:</p>
+<ol>
+  <li>The normal cleansing benefit of the curse.</li>
+  <li>A powerful <strong>random, stackable</strong> Purge Perk, such as:</li>
+</ol>
+<ul>
+  <li>Reduce future card purchase costs by 1 gold.</li>
+  <li>Gain immunity to your next curse.</li>
+  <li>Automatically discover the nearest treasure without movement.</li>
+</ul>
+<p>Purge is expensive, but its rewards can be game-changing and accumulative.</p>
+
+
+
+<h3>Advanced: 🎯 Throw Curse:</h3>
+<ul>
+  <li>If you are cursed, you may attempt to <strong>throw your curse at another player</strong>.</li>
+  <li>Pay <strong>half of your curse’s cleanse cost</strong> to attempt.</li>
+  <li>Select any player who does not already have a curse.</li>
+  <li>There is a <strong>50% chance</strong>:
+    <ul>
+      <li>🎯 <strong>Success:</strong> They immediately receive your curse. But no treasure. </li>
+      <li>❌ <strong>Backfire!:</strong> You lose your money, keep the curse, and it's cleanse cost <strong>doubles</strong>.</li>
+    </ul>
+  </li>
+</ul>
+<p>This adds high risk-reward player interaction and tense decisions.</p>
+
+<h3>🔥 Pro Tip:</h3>
+<p>Curses sting—but their cleansing perks can flip the game. Spend smart, cleanse wisely, and take bold risks!</p>
+
+<h2>🏆 How Do Treasures Affect the Endgame?</h2>
+<p><strong>That’s up to you!</strong></p>
+
+<h3>💀 Classic Cursed.</h3>
+<p>You are still focused on racing to El Dorado, but treasures collected count to offset the turns taken to reach the end.</p>
+<p>Example: if Sol reaches the end in 10 rounds with 3 treasures, and Nadine reaches the end in 12 rounds but has 6 treasures, <strong>Nadine wins</strong>.</p>
+<ul>
+</li><strong>Sol:</strong> 10 (Rounds) - 3 (Treasures) = 7 <strong>Nadine:</strong> 12 (Rounds) - 6 (Treasures) = 6 ✅</li>
+</ul>
+
+<h3>🏴‍☠️ Race to the Hoard!</h3>
+<p>Run around the map like greedy jungle pillagers in a race to collect and cleanse a set amount of treasures:</p>
+<ul>
+</li><strong>2 players:</strong> 6–7 Treasures
+</li><strong>3–4 players:</strong> 5 Treasures
+</ul>
+
+
+        <button onclick="toggleRulesMenu()">Close</button>
+    </div>
+
+    <!-- All Player Information Display -->
+    <div class="container" id="playersContainer">
+        <!-- Player info will be inserted here dynamically -->
+    </div>
+
+
+    <div class="settings-container">
+  <button id="settingsToggle" aria-expanded="true">⚙️</button>
+    <div class="settings">
+        <label>
+    Cleanse Cost:
+    <select id="cleanseDifficulty">
+      <option value="easy">Cheap</option>
+      <option value="normal" selected>Normal</option>
+      <option value="hard">Extortion</option>
+    </select>
+  </label>
+  <label><input type="checkbox" id="togglePurge" checked> Enable Purge</label>
+  <label><input type="checkbox" id="toggleThrow" checked> Enable Throw Curse</label>
+
+</div>
+
+    <script>
+        let players = [];
+        let selectedPlayerIndex = null;
+        let history = [];
+        let throwMode = false;
+        let throwSourceIndex = null;
+        let enableThrow      = true;
+        let enablePurge      = true;
+        let cleanseDifficulty = 'normal';
+
+
+        
+
+
+        // track treasures drawn
+        let treasureCount = 0;
+        // shrine appears after between 2 and 12 treasures
+        const shrineTriggerDraw = Math.floor(Math.random() * 11) + 2;
+        let shrinePlaced = false;
+
+window.addEventListener('DOMContentLoaded', () => {
+  const throwBtn = document.querySelector('button[onclick="throwCurse()"]');
+  const purgeBtn = document.querySelector('button[onclick="purge()"]');
+
+  // When the dropdown changes
+  document.getElementById('cleanseDifficulty')
+    .addEventListener('change', e => {
+      cleanseDifficulty = e.target.value;
+      console.log('Set difficulty to', cleanseDifficulty);
+    });
+
+  // Initialize from whatever is currently selected
+  cleanseDifficulty = document.getElementById('cleanseDifficulty').value;
+  console.log('Initial difficulty is', cleanseDifficulty);
+
+  // Hide/show the other buttons as before
+  document.getElementById('toggleThrow')
+    .addEventListener('change', e => {
+      enableThrow = e.target.checked;
+      throwBtn.style.display = enableThrow ? 'inline-block' : 'none';
+    });
+  document.getElementById('togglePurge')
+    .addEventListener('change', e => {
+      enablePurge = e.target.checked;
+      purgeBtn.style.display = enablePurge ? 'inline-block' : 'none';
+    });
+  // And set their initial visibility:
+  throwBtn.style.display = enableThrow ? 'inline-block' : 'none';
+  purgeBtn.style.display = enablePurge ? 'inline-block' : 'none';
+});
+
+
+        function saveHistory() {
+            history.push(JSON.parse(JSON.stringify(players)));
+        }
+
+function getRandomCurseCost() {
+    console.log('Difficulty:', cleanseDifficulty);
+  const r = Math.random();
+  if (cleanseDifficulty === 'easy') {
+    // mostly cheap curses
+    return r < 0.5 ? 1 : 2;
+  } else if (cleanseDifficulty === 'hard') {
+    // mostly expensive curses
+    return r < 0.3 ? 3 : (r < 0.7 ? 4 : 5);
+  } 
+  // normal
+  return r < 0.4 ? 2 : (r < 0.8 ? 3 : 4);
+}
+
+
+        function placeShrine() {
+            shrinePlaced = true;
+            const player = players[selectedPlayerIndex];
+            displayShrine(player);
+        }
+
+        function displayShrine(player) {
+            showMessage(`A Shrine Appears! ${player.name} may cleanse for free.`);
+            applyShrineBenefit(player);
+        }
+
+        // Toggle the visibility of the rules menu
+        function toggleRulesMenu() {
+            const rulesMenu = document.getElementById("rulesMenu");
+            if (rulesMenu.style.display === "none" || rulesMenu.style.display === "") {
+                rulesMenu.style.display = "block"; // Show the menu
+            } else {
+                rulesMenu.style.display = "none"; // Hide the menu
+            }
+        }
+
+
+const curses = [
+  {
+    name: "Heavy Idol",
+    icon: "🪨",
+    effect: "Each card only moves 1 space.",
+    getBenefit: (cost) => {
+      if (cost <= 2) return "Gain +2 movement action (one-time).";
+      if (cost === 3) return "Gain +3 movement + discard one card to upgrade to +4.";
+      if (cost >= 4) return "Gain +4 movement action and recharge one card next turn.";
+      if (cost >= 8) return "Gain Heroic blessing: 4 gold in stash, +5 movement, AND draw 3 extra cards next turn!";
+    }
+  },
+  {
+    name: "Greedy Gem",
+    icon: "💎",
+    effect: "Discard one extra card when buying.",
+    getBenefit: (cost) => {
+      if (cost <= 2) return "Gain 1 extra gold (for cards this turn or into your stash).";
+      if (cost === 3) return "Gain 2 extra gold (for cards this turn or into your stash) and discard 1 fewer card when buying on your next turn.";
+      if (cost >= 4) return "Gain 3 extra gold (for cards this turn or into your stash) and discard 1 fewer card when buying on your next turn.";
+      if (cost >= 8) return "Gain Heroic blessing: 6 gold for cards or stash, +4 movement, AND an draw extra card next turn!";
+    }
+    },
+  {
+    name: "Banjaxed Compass",
+    icon: "🧭",
+    effect: "Cannot use yellow cards for movement.",
+    getBenefit: (cost) => {
+      if (cost <= 2) return "Draw 1 extra card next turn.";
+      if (cost === 3) return "Draw 2 extra cards next turn.";
+      if (cost >= 4) return  "Draw 3 extra cards and play one yellow card immediately.";
+      if (cost >= 8) return "Gain Heroic blessing: 6 gold for cards or stash, +5 movement, AND draw 2 extra cards next turn!";
+    }
+  },
+  {
+    name: "Pewter Shoes",
+    icon: "🥾",
+    effect: "Must skip your first movement action each turn.",
+    getBenefit: (cost) => {
+      if (cost <= 2) return "Draw 1 card next turn.";
+      if (cost === 3) return "Draw a card and use 2 cards per movement next turn.";
+      if (cost >= 4) return  "Draw 2 cards and use 2 card per movement next turn.";
+      if (cost >= 8) return "Best kicks in town: Draw 2 additional cards and combine as many cards to move as you like.";
+    }
+  },
+  {
+    name: "Fly Agaric",
+    icon: "🍄",
+    effect: "Play your first card at random each turn.",
+    getBenefit: (cost) => {
+      if (cost <= 2) return "Draw a card.";
+      if (cost === 3) return "Draw 1 extra card every turn until you are next cursed.";
+      if (cost >= 4) return  "Draw 2 extra cards every turn until next curse.";
+      if (cost >= 8) return "One-of-a-kind fungus!: Draw 3 extra cards until next cleanse.";
+    }
+  },
+  {
+    name: "Manuka Honey",
+    icon: "🖐️",
+    effect: "Pay 1 extra coin per card purchase.",
+    getBenefit: (cost) => {
+      if (cost <= 2) return "Gain 2 extra gold.";
+      if (cost === 3) return "Gain 3 extra gold and buy cards at a 1 coin discount until next cleanse.";
+      if (cost >= 4) return  "Gain 4 extra gold and buy at a 2 coin discount until next cleanse.";
+      if (cost >= 8) return "Rarest Honey in the world!: Gain 8 extra gold and buy 2 cards per turn.";
+    }
+  },
+  {
+    name: "Broken Machete",
+    icon: "🔪",
+    effect: "Cannot use green cards for movement.",
+    getBenefit: (cost) => {
+      if (cost <= 2) return "Gain 3 machetes for this turn.";
+      if (cost === 3) return "Gain 4 machetes for this turn and recharge one card’s ability next turn.";
+      if (cost >= 4) return  "Gain 6 machetes and recharge two cards’ abilities next turn.";
+      if (cost >= 8) return "Gain Heroic blessing: 6 gold in stash, +6 machetes, AND draw 2 cards.";
+    }
+  },
+  {
+    name: "Mummified Leech",
+    icon: "🌪️",
+    effect: "Draw 1 fewer card each turn. Down to a minimum of 2 cards in hand.",
+    getBenefit: (cost) => {
+      if (cost <= 2) return "Draw 1 additional card next turn.";
+      if (cost === 3) return "Draw 2 additional cards and gain an action phase to use 2 cards per movement.";
+      if (cost >= 4) return  "Draw 3 additional cards and gain two action phases to use 2 cards per movement.";
+      if (cost >= 8) return "Gain Heroic blessing: 5 addition cards.";
+    }
+  }
+];
+
+
+        // Add player to the game
+        function addPlayer() {
+            const name = prompt("Enter player name:");
+            if (!name) return;
+
+            saveHistory(); // Save the state before adding the player
+            players.push({
+                name,
+                curse: null,
+                stash: 0,
+                treasures: 0,
+                benefitMessage: '', // ← this is cleanse benefit (your existing code)
+                purgeBenefits: [],          // ← now an array you can push into
+                immunity: false,
+                skipNextCurse: false,
+                bonusCleansing: false,
+                discount: 0,
+                autoDiscoverTreasure: false,
+                hasHeroCard: false
+            });
+
+            updateDisplay();
+        }
+
+
+
+
+        function drawTreasure() {
+            if (selectedPlayerIndex === null) return showMessage("Please select a player.");
+            saveHistory();
+            const player = players[selectedPlayerIndex];
+
+  player.treasures += 1; 
+
+              if (player.immunity) {
+    player.immunity = false;
+    showResult("🕊️ Your Spirit Guide protects you — you resist this curse!");
+    updateDisplay();
+    return;
+  }
+
+            if (player.curse) {
+                showMessage("You're already cursed!");
+                return;
+            }
+
+            const baseCurse = curses[Math.floor(Math.random() * curses.length)];
+            const curse = {
+                ...baseCurse,
+                cost: getRandomCurseCost()
+            };
+
+            player.curse = curse;
+            player.treasures += 1;
+            treasureCount++;
+            if (!shrinePlaced && treasureCount === shrineTriggerDraw) {
+                shrinePlaced = true; // mark it so we don't fire again
+                showShrineBanner(); // **display** the banner
+            }
+
+            updateDisplay();
+        }
+
+        function drawTreasureWithoutShrineCheck() {
+            if (selectedPlayerIndex === null) return showMessage("Please select a player.");
+            const player = players[selectedPlayerIndex];
+
+  player.treasures += 1; 
+
+              if (player.immunity) {
+    player.immunity = false;
+    showResult("🕊️ Your Spirit Guide protects you — you resist this curse!");
+    updateDisplay();
+    return;
+  }
+            if (player.curse) return; // player can't have a curse already
+
+                saveHistory(); 
+
+            const baseCurse = curses[Math.floor(Math.random() * curses.length)];
+            const curse = {
+                ...baseCurse,
+                cost: getRandomCurseCost()
+            };
+
+            player.curse = curse;
+            player.treasures += 1;
+
+            updateDisplay();
+        }
+
+        function finishThrow(isSuccess, source, target) {
+           saveHistory();  
+  // clear UI highlights/banner
+  document.querySelectorAll('.player-info.highlight-target')
+          .forEach(c => c.classList.remove('highlight-target'));
+  document.getElementById("throwBanner")?.remove();
+
+  // apply the result
+  if (isSuccess) {
+    target.curse = source.curse;
+    source.curse = null;
+  } else {
+    source.curse.cost *= 2;
+  }
+
+  // show the result box
+  showResult(
+    isSuccess
+      ? `<strong>Success!</strong> Curse thrown to ${target.name}!`
+      : `<strong>Backfire!</strong> You keep the curse and ${source.curse.name} cleanse cost doubles to ${source.curse.cost} gold.`
+  );
+
+  // end throw‐mode and refresh
+  throwMode = false;
+  updateDisplay();
+}
+
+
+
+        // Function to display the shrine when the right turn comes
+        function displayShrine(player) {
+            showMessage(`A Shrine Appears! Player ${player.name}, you can now cleanse your curse for free!`);
+            // You can further customize this message and shrine logic as needed
+            // For example, the shrine can have a one-time benefit or be available for all players
+            applyShrineBenefit(player);
+        }
+
+        // Apply shrine benefit (example of cleansing for free)
+        function applyShrineBenefit(player) {
+            if (player.curse) {
+                player.stash = Math.max(0, player.stash - player.curse.cost); // If shrine cleanses, no cost
+                player.curse = null; // Remove the curse
+                player.benefitMessage = "✨ Cleansed at the Shrine!";
+            }
+            updateDisplay();
+        }
+
+
+// ————————————————
+// 2) Update useRitual() to invoke a FREE purge
+// ————————————————
+function useRitual() {
+  if (selectedPlayerIndex === null) {
+    showMessage("Please select a player.");
+    return;
+  }
+  const player = players[selectedPlayerIndex];
+  if (!player.curse) {
+    showMessage("No curse to remove.");
+    return;
+  }
+
+  saveHistory();
+
+  // ——— Wizard's Friend: next ritual is a free purge ———
+  if (player.bonusCleansing) {
+    player.bonusCleansing = false;   // consume the perk
+    showMessage("🔮 Wizard's Friend activates! This ritual is upgraded to a FREE Purge!");
+    purge(true);                     // skipCost = true
+    return;
+  }
+
+  // ——— Normal cleansing ritual ———
+  if (player.stash < player.curse.cost) {
+    showMessage("Not enough gold.");
+    return;
+  }
+
+  player.stash -= player.curse.cost;
+  applyCleansingBenefit(player);
+  player.curse = null;
+  updateDisplay();
+}
+
+
+
+// ————————————————
+// 1) Update purge() to accept skipCost
+// ————————————————
+function purge(skipCost = false) {
+  if (!enablePurge) return showMessage("Purge is currently disabled in settings.");
+  if (selectedPlayerIndex === null) {
+    showMessage("Please select a player.");
+    return;
+  }
+  const player = players[selectedPlayerIndex];
+  if (!player.curse) {
+    showMessage("No curse to remove.");
+    return;
+  }
+
+  saveHistory();
+  const cost = player.curse.cost * 2;
+
+  // skipCost => ignore both the check AND the deduction
+  if (!skipCost && player.stash < cost) {
+    showMessage("Not enough gold for Purge!");
+    return;
+  }
+
+  // 1) Capture and apply the cleansing benefit:
+  const cleanseMsg = typeof player.curse.getBenefit === "function"
+    ? player.curse.getBenefit(player.curse.cost)
+    : player.curse.benefit || "";
+  player.benefitMessage = cleanseMsg;
+
+  // 2) Deduct the gold (unless we're skipping cost) and clear the curse:
+  if (!skipCost) player.stash -= cost;
+  player.curse = null;
+
+  // 3) Generate and store the purge perk:
+  const purgeBenefits = [
+    "📜 <strong>Blessing of the Ancients:</strong> <i><strong>KEEP</strong></i> Reduces future card purchase costs by 1 gold.",
+    "🕊️ <strong>Spirit Guide:</strong> Grants immunity to the next curse encountered.",
+    "🏴‍☠️ <strong>Treasure Hunter's Instinct:</strong> Automatically discovers the nearest treasure without movement.",
+    "🧭 <strong>Pathfinder's Insight:</strong> <i><strong>KEEP</strong></i> +1 movement on 1 card each turn.",
+    "🌟 <strong>El Dorado's Favor:</strong> Draw 2 cards. <strong>Win any tiebreak.</strong>",
+    "🧙 <strong>Wizard's Friend:</strong> Your next Cleansing Ritual will be Upgraded to a Purge!"
+  ];
+  const perk = purgeBenefits[Math.floor(Math.random() * purgeBenefits.length)];
+  player.purgeBenefits.push(perk);
+
+  // 4) Apply any immediate game-state effects from the perk:
+  if (perk.includes("Spirit Guide")) {
+    player.immunity = true;
+  } else if (perk.includes("Treasure Hunter's Instinct")) {
+    setTimeout(() => drawTreasureWithoutShrineCheck(), 0);
+  } else if (perk.includes("Wizard's Friend")) {
+    player.bonusCleansing = true;
+  }
+
+  // 5) Finally, re-render
+  updateDisplay();
+}
+
+
+
+
+
+
+
+        // Apply cleansing benefit
+function applyCleansingBenefit(player) {
+    const benefitMessage = player.curse.getBenefit(player.curse.cost);
+    player.benefitMessage = benefitMessage;
+    updateDisplay();
+}
+
+
+function throwCurse() {
+     if (!enableThrow) return showMessage("Throw Curse is currently disabled in settings.");
+  if (selectedPlayerIndex === null) return showMessage("Select yourself first (the player throwing).");
+  const source = players[selectedPlayerIndex];
+  if (!source.curse) return showMessage("You have no curse to throw.");
+
+  // find uncursed targets
+  const possible = players
+    .map((p,i) => ({i,has:p.curse}))
+    .filter(x => x.i !== selectedPlayerIndex && !x.has)
+    .map(x => x.i);
+
+  if (!possible.length) return showMessage("No eligible players to receive the curse.");
+
+  // 1) Show banner
+  let existing = document.getElementById("throwBanner");
+  if (existing) existing.remove();
+  const banner = document.createElement("div");
+  banner.id = "throwBanner";
+  banner.textContent = "Pick a player to throw your curse to →";
+  document.body.appendChild(banner);
+
+  // 2) Highlight valid player boards
+  document.querySelectorAll('.player-info').forEach((card, idx) => {
+    if (possible.includes(idx)) card.classList.add('highlight-target');
+  });
+
+  // 3) Enter throw-mode
+  throwMode = true;
+  throwSourceIndex = selectedPlayerIndex;
+}
+
+
+
+
+        // Update the display for player information
+        function updateDisplay() {
+            const playersContainer = document.getElementById("playersContainer");
+            playersContainer.innerHTML = "";
+
+            players.forEach((player, index) => {
+                const playerDiv = document.createElement("div");
+                playerDiv.className = "player-info";
+                if (index === selectedPlayerIndex) {
+                    playerDiv.classList.add("selected");
+                }
+
+                if (player.curse) {
+  playerDiv.classList.add("cursed");
+}
+
+                        const removeBtnHTML = (index === selectedPlayerIndex)
+          ? `<button class="remove-btn" onclick="showRemoveConfirm(selectedPlayerIndex)">×</button>`
+          : "";
+
+                playerDiv.innerHTML = `
+<div class="player-name-bar">
+  <button class="name-btn" onclick="selectPlayer(${index})">
+    ${player.name}
+  </button>
+  <button class="remove-btn" onclick="showRemoveConfirm(${index})">×</button>
+</div>
+            <div class="token">Treasures: ${player.treasures}</div>
+            <div class="curse">
+                ${player.curse ? `
+                    <span class="curse-icon">${player.curse.icon}</span> 
+                    <strong>${player.curse.name}:</strong> ${player.curse.effect}
+                    <div class="cleanse-cost"><strong>Cleanse Cost:</strong> ${player.curse.cost} gold</div>
+                ` : "No curse"}
+            </div>
+            <div class="stash-controls">
+                <button onclick="changeStash(${index}, -1)">-</button>
+                <span>Stash: ${player.stash} Gold</span>
+                <button onclick="changeStash(${index}, 1)">+</button>
+            </div>
+
+${player.benefitMessage ? `
+  <div class="benefit cleanse-benefit">
+    <strong>Cleanse Benefit:</strong> ${player.benefitMessage}
+    <button class="clear-benefit-btn" onclick="clearCleansingBenefit(${index})">
+      Clear Cleanse Benefit
+    </button>
+  </div>
+            ` : ""}
+
+${player.purgeBenefits.map((perk, pIdx) => `
+  <div class="benefit purge-benefit">
+    <strong>Purge Perk:</strong> ${perk}
+    <button class="clear-benefit-btn" onclick="clearPurgePerk(${index},${pIdx})">
+      Clear Purge Perk
+    </button>
+  </div>
+`).join('')}
+
+        `;
+
+                playersContainer.appendChild(playerDiv);
+            });
+        }
+
+
+        // Change stash amount (Add or subtract gold)
+        function changeStash(playerIndex, amount) {
+            const player = players[playerIndex];
+            saveHistory();
+            if (player && player.stash + amount >= 0) {
+                player.stash += amount;
+                updateDisplay();
+            }
+        }
+
+function clearThrowUI() {
+  // exit throw mode
+  throwMode = false;
+  throwSourceIndex = null;
+  // remove banner
+  document.getElementById("throwBanner")?.remove();
+  // un-highlight any cards
+  document.querySelectorAll('.player-info.highlight-target')
+    .forEach(c => c.classList.remove('highlight-target'));
+}
+
+function selectPlayer(index) {
+  if (throwMode) {
+    const source = players[throwSourceIndex];
+    const target = players[index];
+    const halfCost = source && source.curse
+      ? Math.ceil(source.curse.cost / 2)
+      : 0;
+
+    // 1) Clicking yourself
+    if (index === throwSourceIndex) {
+      clearThrowUI();
+      showMessage("You can't throw a curse to yourself!");
+      return;
+    }
+
+    // 2) No curse to throw
+    if (!source || !source.curse) {
+      clearThrowUI();
+      showMessage("No curse to throw.");
+      return;
+    }
+
+    // 3) Target already cursed
+    if (target.curse) {
+      clearThrowUI();
+      showMessage(`${target.name} already has a curse!`);
+      return;
+    }
+
+    // 4) Cannot afford the half-cost
+    if (source.stash < halfCost) {
+      clearThrowUI();
+      showMessage(`Not enough gold to attempt throwing (need ${halfCost}).`);
+      return;
+    }
+
+    // ————— All checks passed: do the throw —————
+    saveHistory();
+    source.stash -= halfCost;
+    const isSuccess = Math.random() < 0.5;
+
+      // ————— Create the roulette spinner banner —————
+      const banner = document.createElement('div');
+      Object.assign(banner.style, {
+        position: 'fixed',
+        top:    '40%',
+        left:   '50%',
+        transform: 'translate(-50%, -50%)',
+        padding:    '20px 40px',
+        backgroundColor: '#8c7b5a',
+        color:     'white',
+        fontSize:  '2.5rem',
+        fontWeight:'bold',
+        borderRadius:'10px',
+        boxShadow:  '0 4px 10px rgba(0,0,0,0.5)',
+        zIndex:    '9999'
+      });
+      document.body.appendChild(banner);
+
+      let words = ['THROW!', 'BACKFIRE!'];
+      let currentIndex = 0;
+      let delay = 100;
+
+      // ————— The decelerating spin function —————
+      function spinRoulette() {
+        banner.textContent = words[currentIndex % 2];
+        currentIndex++;
+        if (delay < 500) {
+          delay += 30;
+          setTimeout(spinRoulette, delay);
+        } else {
+          // ————— Stop spinner —————
+          document.body.removeChild(banner);
+finishThrow(isSuccess, source, target);
+
+// Remove highlights / banner
+document.querySelectorAll('.player-info.highlight-target')
+        .forEach(c => c.classList.remove('highlight-target'));
+if (document.getElementById("throwBanner")) 
+  document.getElementById("throwBanner").remove();
+
+// End throw mode & refresh
+throwMode = false;
+updateDisplay();
+
+        }
+      }
+
+      // start the spin!
+      spinRoulette();
+
+// remove banner & highlights
+const b = document.getElementById("throwBanner");
+if (b) b.remove();
+document.querySelectorAll('.player-info.highlight-target')
+        .forEach(c => c.classList.remove('highlight-target'));
+
+
+    } else {
+      // ————— Normal selection —————
+      selectedPlayerIndex = index;
+      updateDisplay();
+    }
+  }
+
+
+        // Clear benefit after cleansing
+        function clearBenefit(index) {
+            const player = players[index];
+            player.benefitMessage = '';
+            updateDisplay();
+        }
+
+        function clearCleansingBenefit(index) {
+            players[index].benefitMessage = '';
+            updateDisplay();
+        }
+
+        function clearPurgeBenefit(index) {
+            players[index].purgeBenefitMessage = '';
+            updateDisplay();
+        }
+
+        function clearPurgePerk(playerIndex, perkIndex) {
+  players[playerIndex].purgeBenefits.splice(perkIndex, 1);
+  updateDisplay();
+}
+
+
+        // Save the current state of players to history
+        console.log(history); // Before and after saveHistory()
+
+        function saveHistory() {
+            const snapshot = JSON.parse(JSON.stringify(players)); // Create a deep copy of players
+            history.push(snapshot);
+        }
+        console.log(history); // Before and after saveHistory()
+
+
+        function undo() {
+            if (history.length === 0) {
+                showMessage("No actions to undo.");
+                  clearThrowUI();
+                return;
+            }
+
+            // Pop the last saved state from history and revert players to that state
+            const lastState = history.pop();
+            players = JSON.parse(JSON.stringify(lastState)); // Deep copy to revert players
+
+            updateDisplay(); // Update the UI with the reverted state
+        }
+
+        function getRandomTile() {
+            const tileCatalogue = [
+                'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+                'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+                'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+                'Ending-Water', 'Ending-Jungle'
+            ];
+            return tileCatalogue[
+                Math.floor(Math.random() * tileCatalogue.length)
+            ];
+        }
+
+function getShrineDistance() {
+  if (Math.random() < 0.5) {
+    // half the time: pick 10–23
+    return Math.floor(Math.random() * (23 - 10 + 1)) + 10;
+  } else {
+    // the other half: pick from 1–9 and 24–44
+    const lowStart = 1, lowEnd = 9;
+    const highStart = 24, highEnd = 44;
+    const lowCount  = lowEnd - lowStart + 1;      // 9
+    const highCount = highEnd - highStart + 1;    // 21
+    const total     = lowCount + highCount;       // 30
+    let idx = Math.floor(Math.random() * total);
+    if (idx < lowCount) {
+      return lowStart + idx;
+    } else {
+      return highStart + (idx - lowCount);
+    }
+  }
+}
+
+function showShrineBanner() {
+  const distance   = getShrineDistance();  
+  const playerName = players[selectedPlayerIndex]?.name || "the active player";
+  const wrap       = document.getElementById('shrineBannerContainer');
+
+  wrap.innerHTML = `
+    <div id="shrineBanner" class="shrine-banner">
+      ⛩️ <strong>Shrine Appears!</strong>
+      <span>It’s rumoured to be <em>${distance} hexes</em> away from ${playerName}!</span>
+      <button onclick="placeShrine()">Place the Shrine!</button>
+    </div>
+  `;
+}
+function placeShrine() {
+  const wrap = document.getElementById('shrineBannerContainer');
+  wrap.innerHTML = `
+    <div id="shrineBanner" class="shrine-banner collapsed">
+      <button
+        id="shrineIconBtn"
+        onclick="useShrine()"
+        aria-label="Use Shrine"
+        style="color:black;background:none;border:none;font-size:1.5rem;cursor:pointer"
+      >⛩️ <strong>Use Shrine!</strong></button>
+    </div>
+  `;
+}
+
+
+
+
+
+        /** Removes the shrine banner from the DOM */
+        function dismissShrineBanner() {
+            const b = document.getElementById('shrineBanner');
+            if (b) b.remove();
+        }
+
+        /**
+         * Called when the user clicks “Use Shrine”.
+         * Cleanses the selected player, then
+         * dismisses the banner.
+         */
+        function useShrine() {
+            if (selectedPlayerIndex === null) {
+                showMessage('Select a player first to use the shrine.');
+                return;
+            }
+            const player = players[selectedPlayerIndex];
+            if (!player.curse) {
+                showMessage('This player has no curse to remove.');
+                dismissShrineBanner();
+                return;
+            }
+
+            saveHistory(); // for undo
+            player.curse = null; // free cleanse
+            player.benefitMessage = '✨ Cleansed at the Shrine for free!';
+
+            dismissShrineBanner(); // **remove the banner**
+            updateDisplay(); // refresh UI
+        }
+        function clearThrowResult() {
+  const box = document.getElementById("throwResultBox");
+  box.style.display = "none";
+  box.innerHTML = "";
+}
+
+/** 1-button notice (like “OK”) */
+function showMessage(text, onClose) {
+  const box = document.getElementById('messageBox');
+  box.innerHTML = `
+    <button class="clear-result" onclick="hideMessage();${onClose||''}">×</button>
+    <p>${text}</p>
+  `;
+  box.style.display = 'block';
+}
+function hideMessage() {
+  const box = document.getElementById('messageBox');
+  box.style.display = 'none';
+  box.innerHTML = '';
+}
+
+/** Yes/No confirm */
+function showConfirm(text, onYes) {
+  const box = document.getElementById('messageBox');
+  box.innerHTML = `
+    <button class="clear-result" onclick="hideMessage()">×</button>
+    <p>${text}</p>
+    <button class="btn btn-yes" onclick="hideMessage();(${onYes})();">Yes</button>
+    <button class="btn btn-no"  onclick="hideMessage()">No</button>
+  `;
+  box.style.display = 'block';
+}
+
+/** “Result” banner (like Throw Curse) */
+function showResult(html) {
+  const box = document.getElementById('resultBox');
+  box.innerHTML = `
+    <button class="clear-result" onclick="hideResult()">×</button>
+    ${html}
+  `;
+  box.style.display = 'block';
+}
+function hideResult() {
+  const box = document.getElementById('resultBox');
+  box.style.display = 'none';
+  box.innerHTML = '';
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  hideMessage();
+  hideResult();
+});
+
+    </script>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js')
+    .then(() => console.log('Service Worker registered'));
+}
+// 1) Show the confirm dialog for removing a player
+function showRemoveConfirm(idx) {
+  const box = document.getElementById('removeConfirmBox');
+  box.innerHTML = `
+    <button class="clear-result" onclick="clearRemoveConfirm()">×</button>
+    <p>Remove <strong>${players[idx].name}</strong>? Are you sure?</p>
+    <button class="btn btn-yes" onclick="removePlayer(${idx})">Yes</button>
+    <button class="btn btn-no" onclick="clearRemoveConfirm()">No</button>
+  `;
+  box.style.display = 'block';
+}
+
+// 2) Close/hide the confirm dialog without removing
+function clearRemoveConfirm() {
+  const box = document.getElementById('removeConfirmBox');
+  box.style.display = 'none';
+  box.innerHTML = '';
+}
+
+// 3) Actually remove the player and re-render
+function removePlayer(idx) {
+  saveHistory();           // for undo
+  players.splice(idx, 1);  // remove from array
+  clearRemoveConfirm();
+  updateDisplay();         // refresh UI
+}
+
+const settingsToggle = document.getElementById('settingsToggle');
+const settingsPanel  = document.querySelector('.settings');
+
+settingsToggle.addEventListener('click', () => {
+  const isHidden = settingsPanel.classList.toggle('collapsed');
+  settingsToggle.setAttribute('aria-expanded', !isHidden);
+});
+
+const headerToggle = document.getElementById('headerToggle');
+const headerContent = document.querySelector('.header-content');
+
+headerToggle.addEventListener('click', () => {
+  const isHidden = headerContent.classList.toggle('collapsed');
+  // Flip arrow icon
+  headerToggle.textContent = isHidden ? '▲' : '▼';
+  headerToggle.setAttribute('aria-expanded', !isHidden);
+});
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js')
+    .then(() => console.log('Service Worker registered'));
+}
+
+
+</script>
+
+</body>
+
+</html>
