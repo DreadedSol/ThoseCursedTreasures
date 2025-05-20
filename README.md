@@ -1,1 +1,1 @@
-# ThemCursedTreasures
+# ThoseCursedTreasures
