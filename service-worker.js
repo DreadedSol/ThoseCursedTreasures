@@ -9,7 +9,6 @@ const ASSETS = [
   'images/icon-512.png',
   'images/parchment-map.png',
   'images/parchment-player2.png',
-  'images/parchment-tile.png',
   // …and any other files (CSS, JS, fonts, more images) exactly as they appear in your repo
 ];
 
