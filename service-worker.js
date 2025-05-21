@@ -15,27 +15,22 @@ const ASSETS = [
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        return Promise.all(
-          ASSETS.map(url =>
-            fetch(url).then(response => {
-              if (!response.ok) {
-                console.error(`❌ Failed to fetch ${url}: ${response.status}`);
-                throw new Error(`Bad response for ${url}`);
-              }
-              console.log(`✅ Caching ${url}`);
-              return cache.put(url, response.clone());
-            })
-          )
-        );
-      })
-      .catch(err => {
-        console.error('❌ Cache install failed:', err);
-      })
-      .then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then(async cache => {
+      for (const url of ASSETS) {
+        try {
+          const response = await fetch(url);
+          if (!response.ok) throw new Error(`Status ${response.status}`);
+          await cache.put(url, response.clone());
+          console.log(`✅ Cached: ${url}`);
+        } catch (err) {
+          console.error(`❌ Failed to cache: ${url} — ${err.message}`);
+        }
+      }
+      self.skipWaiting();
+    })
   );
 });
+
 
 
 self.addEventListener('activate', evt => {
