@@ -66,7 +66,7 @@ body > * {
   left: 50%;
   transform: translateX(-50%);
   margin: 0.5rem auto;   
-  background: rgba(255, 255, 255, 0.219); /* opaque white */
+  background: rgba(255, 255, 255, 0.356); /* opaque white */
   padding: 8px;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.15);
@@ -366,6 +366,13 @@ body > * {
             color: white;
         }
 
+        .clear-benefit-btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  color: #888;
+}
+
+
 /* Cleanse Benefit = green tab */
 .benefit.cleanse-benefit {
   background: #e8f5e9;            /* pale green */
@@ -632,7 +639,7 @@ body > * {
     <h2 class="subtitle">The Quest for El Dorado:</h2>
     <h1>Those Cursed Treasures</h1>
     <p style="text-align: center;">
-    A homebrewed expansion for <strong>Reiner Knizia</strong>'s brilliant racing deck-builder. Conceived and implemented by <strong>Lost Sol.</strong> <br>
+    A homebrewed expansion for <strong>Reiner Knizia</strong>'s brilliant racing deck-builder. Conceived and implemented by <strong>DreadedSol.</strong> <br>
 Devised to be played with the base game using the cave's variant. <br>
 <strong>Extra things needed:</strong> <strong>2x</strong> (amount of boards used) <strong>tokens</strong> to represent Cursed Treasures</strong>, and <strong>1 token</strong> to represent the Shrine.</p>
 </p>
@@ -1005,47 +1012,49 @@ const curses = [
 
 
 
-        function drawTreasure() {
-            if (selectedPlayerIndex === null) return showMessage("Please select a player.");
-            saveHistory();
-            const player = players[selectedPlayerIndex];
+function drawTreasure() {
+  if (selectedPlayerIndex === null) {
+    return showMessage("Please select a player.");
+  }
+  saveHistory();
 
-  player.treasures += 1; 
+  const player = players[selectedPlayerIndex];
 
-              if (player.immunity) {
+  // 1) Always count the treasure for the player…
+  player.treasures++;
+
+  // 2) …and bump the global draw counter for shrine logic.
+  treasureCount++;
+
+  // 3) If they have Spirit Guide immunity, consume it and stop here:
+  if (player.immunity) {
     player.immunity = false;
     showResult("🕊️ Your Spirit Guide protects you — you resist this curse!");
     updateDisplay();
     return;
   }
 
-            if (player.curse) {
-                showMessage("You're already cursed!");
-                return;
-            }
+  // 4) Already cursed? Don’t allow another.
+  if (player.curse) {
+    return showMessage("You're already cursed!");
+  }
 
-            const baseCurse = curses[Math.floor(Math.random() * curses.length)];
-            const curse = {
-                ...baseCurse,
-                cost: getRandomCurseCost()
-            };
+  // 5) Otherwise assign a new curse:
+  const baseCurse = curses[Math.floor(Math.random() * curses.length)];
+  player.curse = { ...baseCurse, cost: getRandomCurseCost() };
 
-            player.curse = curse;
-            player.treasures += 1;
-            treasureCount++;
-            if (!shrinePlaced && treasureCount === shrineTriggerDraw) {
-                shrinePlaced = true; // mark it so we don't fire again
-                showShrineBanner(); // **display** the banner
-            }
+  // 6) Shrine check now works even if immunity was used earlier:
+  if (!shrinePlaced && treasureCount === shrineTriggerDraw) {
+    showShrineBanner();
+  }
 
-            updateDisplay();
-        }
+  updateDisplay();
+}
+
 
         function drawTreasureWithoutShrineCheck() {
             if (selectedPlayerIndex === null) return showMessage("Please select a player.");
             const player = players[selectedPlayerIndex];
-
-  player.treasures += 1; 
 
               if (player.immunity) {
     player.immunity = false;
@@ -1106,15 +1115,13 @@ const curses = [
             applyShrineBenefit(player);
         }
 
-        // Apply shrine benefit (example of cleansing for free)
-        function applyShrineBenefit(player) {
-            if (player.curse) {
-                player.stash = Math.max(0, player.stash - player.curse.cost); // If shrine cleanses, no cost
-                player.curse = null; // Remove the curse
-                player.benefitMessage = "✨ Cleansed at the Shrine!";
-            }
-            updateDisplay();
-        }
+function applyShrineBenefit(player) {
+  // compute and assign the same benefit
+  player.benefitMessage = player.curse.getBenefit(player.curse.cost);
+  player.curse = null;
+  updateDisplay();
+}
+
 
 
 // ————————————————
@@ -1130,6 +1137,10 @@ function useRitual() {
     showMessage("No curse to remove.");
     return;
   }
+  if (Number(player.stash) < Number(player.curse.cost)) {
+  showMessage("Not enough gold.");
+  return;
+}
 
   saveHistory();
 
@@ -1147,7 +1158,7 @@ function useRitual() {
     return;
   }
 
-  player.stash -= player.curse.cost;
+player.stash -= Number(player.curse.cost);
   applyCleansingBenefit(player);
   player.curse = null;
   updateDisplay();
@@ -1313,14 +1324,23 @@ ${player.benefitMessage ? `
   </div>
             ` : ""}
 
-${player.purgeBenefits.map((perk, pIdx) => `
-  <div class="benefit purge-benefit">
-    <strong>Purge Perk:</strong> ${perk}
-    <button class="clear-benefit-btn" onclick="clearPurgePerk(${index},${pIdx})">
-      Clear Purge Perk
-    </button>
-  </div>
-`).join('')}
+${player.purgeBenefits.map((perk, pIdx) => {
+  const isKeep = perk.includes('KEEP');
+  return `
+    <div class="benefit purge-benefit">
+      <strong>Purge Perk:</strong> <br>${perk}
+      <button
+        class="clear-benefit-btn"
+        ${isKeep
+          ? 'disabled'
+          : `onclick="clearPurgePerk(${index}, ${pIdx})"`}
+      >
+        Clear Purge Perk
+      </button>
+    </div>
+  `;
+}).join('')}
+
 
         `;
 
@@ -1464,11 +1484,13 @@ document.querySelectorAll('.player-info.highlight-target')
         }
 
         function clearCleansingBenefit(index) {
+            saveHistory(); 
             players[index].benefitMessage = '';
             updateDisplay();
         }
 
         function clearPurgeBenefit(index) {
+            saveHistory(); 
             players[index].purgeBenefitMessage = '';
             updateDisplay();
         }
@@ -1572,30 +1594,36 @@ function placeShrine() {
             if (b) b.remove();
         }
 
-        /**
-         * Called when the user clicks “Use Shrine”.
-         * Cleanses the selected player, then
-         * dismisses the banner.
-         */
-        function useShrine() {
-            if (selectedPlayerIndex === null) {
-                showMessage('Select a player first to use the shrine.');
-                return;
-            }
-            const player = players[selectedPlayerIndex];
-            if (!player.curse) {
-                showMessage('This player has no curse to remove.');
-                dismissShrineBanner();
-                return;
-            }
 
-            saveHistory(); // for undo
-            player.curse = null; // free cleanse
-            player.benefitMessage = '✨ Cleansed at the Shrine for free!';
+// When the shrine is placed and the active player clicks “Use Shrine”
+function useShrine() {
+  if (selectedPlayerIndex === null) {
+    showMessage('Select a player first to use the shrine.');
+    return;
+  }
+  const player = players[selectedPlayerIndex];
+  if (!player.curse) {
+    showMessage('This player has no curse to remove.');
+    dismissShrineBanner();
+    return;
+  }
 
-            dismissShrineBanner(); // **remove the banner**
-            updateDisplay(); // refresh UI
-        }
+  saveHistory(); // for undo
+
+  // 1) Compute the normal cleanse benefit from the curse
+  const benefitMsg = player.curse.getBenefit(player.curse.cost);
+
+  // 2) Remove the curse
+  player.curse = null;
+
+  // 3) Store and display that benefit
+  player.benefitMessage = benefitMsg;
+
+  // 4) Clean up UI
+  dismissShrineBanner();
+  updateDisplay();
+}
+
         function clearThrowResult() {
   const box = document.getElementById("throwResultBox");
   box.style.display = "none";
@@ -1652,9 +1680,11 @@ window.addEventListener('DOMContentLoaded', () => {
     </script>
 <script>
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js')
-    .then(() => console.log('Service Worker registered'));
+  navigator.serviceWorker.register('service-worker.js')
+    .then(() => console.log('Service Worker registered'))
+    .catch(err => console.error('SW registration failed:', err));
 }
+
 // 1) Show the confirm dialog for removing a player
 function showRemoveConfirm(idx) {
   const box = document.getElementById('removeConfirmBox');
