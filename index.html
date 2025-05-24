@@ -574,6 +574,29 @@ body > * {
   background-color: #b45f06;
 }
 
+/* Re-apply full btn-water styling inside the bottom bar */
+#bottomBar .btn-water {
+  /* base look */
+  background-color: #007ACC;
+  color: white;
+  padding: 10px 15px;      /* match your .controls buttons */
+  border: none;
+  border-radius: 5px;      /* rounded corners like the rest */
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  text-align: center;
+}
+
+/* hover state */
+#bottomBar .btn-water:hover {
+  background-color: #333;
+}
+
+#bottomBar 
+
+
+
 /* a simple hover effect for all of them */
 .controls button.btn-default:hover,
 .controls button.btn-action:hover,
@@ -694,7 +717,7 @@ body > * {
   border-top: 2px solid #8c7b5a;
 
   /* tint color underneath */
-  background-color: rgba(78, 51, 46, 0.6);
+  background-color: rgba(207, 175, 127, 0.6);
 
   /* your image on top of the tint */
   background-image: url('images/parchment-player2.png');
@@ -730,7 +753,10 @@ body > * {
   background-color: #3b531a;
   padding: 16px 24px;
   font-size: 1.3rem;
-  border-radius: 4px;
+  border-radius: 5px;      /* rounded corners like the rest */
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  text-align: center;
 }
 
 /* the stacked “small” buttons */
@@ -799,6 +825,8 @@ Devised to be played with the base game using the cave's variant. <br>
     <button class="btn-small" onclick="finishSelectedPlayer()">Player Finished</button>
     <button class="btn-small" onclick="confirmCalculateScores()">End Game/Scores</button>
   </div>
+    <button class="btn-water"     onclick="toggleRulesMenu()">Rules</button>
+  <button class="btn-water"     onclick="undo()">Undo</button>
 </div>
 
 
@@ -811,8 +839,6 @@ Devised to be played with the base game using the cave's variant. <br>
   <button class="btn-action"    onclick="useRitual()">Use Cleansing Ritual</button>
   <button class="btn-yellow"    onclick="purge()">Purge!</button>
   <button class="btn-burgundy"  onclick="throwCurse()">Throw Curse</button>
-  <button class="btn-water"     onclick="toggleRulesMenu()">Rules</button>
-  <button class="btn-water"     onclick="undo()">Undo</button>
 </div>
     <div id="throwResultBox" class="result-box" style="display:none;"></div>
     <!-- Confirmation box for Remove Player -->
