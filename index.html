@@ -150,12 +150,17 @@ body > * {
 }
 
 
-        .player-info.selected {
-            background-color: #ffeb3b;
-            /* Yellow background for selected player */
-            border: 2px solid #ff9800;
-            /* Bright orange border */
-        }
+.player-info.selected {
+  background-image:
+    linear-gradient(rgba(255,235,59,0.6), rgba(255,235,59,0.6)),
+    url('images/parchment-player2.png'),
+    linear-gradient(#fffaf3, #fffaf3);
+  background-size: cover;
+  background-blend-mode: multiply;
+  /* adjust border, etc. as before */
+  border: 2px solid #ff9800;
+}
+
 
         .player-info button {
             font-weight: bold;
@@ -913,7 +918,7 @@ const curses = [
       if (cost <= 2) return "Gain 1 extra gold (for cards this turn or into your stash).";
       if (cost === 3) return "Gain 2 extra gold (for cards this turn or into your stash) and discard 1 fewer card when buying on your next turn.";
       if (cost >= 4) return "Gain 3 extra gold (for cards this turn or into your stash) and discard 1 fewer card when buying on your next turn.";
-      if (cost >= 8) return "Gain Heroic blessing: 6 gold for cards or stash, +4 movement, AND an draw extra card next turn!";
+      if (cost >= 8) return "Gain Heroic Gem: +6 gold (for buying cards now or stashed for later), +4 any movement, AND an draw extra card next turn!";
     }
     },
   {
@@ -923,8 +928,8 @@ const curses = [
     getBenefit: (cost) => {
       if (cost <= 2) return "Draw 1 extra card next turn.";
       if (cost === 3) return "Draw 2 extra cards next turn.";
-      if (cost >= 4) return  "Draw 3 extra cards and play one yellow card immediately.";
-      if (cost >= 8) return "Gain Heroic blessing: 6 gold for cards or stash, +5 movement, AND draw 2 extra cards next turn!";
+      if (cost >= 4) return  "Draw 3 extra cards and +2 yellow movement immediately.";
+      if (cost >= 8) return "Gain Heroic Compass of Awesomeness: +6 gold (for buying cards now or stashed for later), +4 any movement, AND draw 2 extra cards next turn!";
     }
   },
   {
@@ -1123,47 +1128,46 @@ function applyShrineBenefit(player) {
 }
 
 
-
-// ————————————————
-// 2) Update useRitual() to invoke a FREE purge
-// ————————————————
 function useRitual() {
   if (selectedPlayerIndex === null) {
-    showMessage("Please select a player.");
-    return;
+    return showMessage("Please select a player.");
   }
   const player = players[selectedPlayerIndex];
+
+  // 1) Must have a curse
   if (!player.curse) {
-    showMessage("No curse to remove.");
+    return showMessage("No curse to remove.");
+  }
+
+  // 2) Free‐purge upgrade?
+  if (player.bonusCleansing) {
+    player.bonusCleansing = false;
+    showMessage("🔮 Wizard's Friend activates! This ritual is upgraded to a FREE Purge!");
+    purge(true);
     return;
   }
-  if (Number(player.stash) < Number(player.curse.cost)) {
-  showMessage("Not enough gold.");
-  return;
-}
+
+  // 3) Check gold
+  const stash = Number(player.stash);
+  const cost  = Number(player.curse.cost);
+  if (stash < cost) {
+    return showMessage("Not enough gold.");
+  }
 
   saveHistory();
 
-  // ——— Wizard's Friend: next ritual is a free purge ———
-  if (player.bonusCleansing) {
-    player.bonusCleansing = false;   // consume the perk
-    showMessage("🔮 Wizard's Friend activates! This ritual is upgraded to a FREE Purge!");
-    purge(true);                     // skipCost = true
-    return;
-  }
+  // 4) Deduct cost
+  player.stash = stash - cost;
 
-  // ——— Normal cleansing ritual ———
-  if (player.stash < player.curse.cost) {
-    showMessage("Not enough gold.");
-    return;
-  }
+  // 5) Capture benefit *before* clearing the curse
+  const benefitMsg = player.curse.getBenefit(cost);
+  player.benefitMessage = benefitMsg;
 
-player.stash -= Number(player.curse.cost);
-  applyCleansingBenefit(player);
+  // 6) Finally clear the curse
   player.curse = null;
+
   updateDisplay();
 }
-
 
 
 // ————————————————
