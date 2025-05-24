@@ -104,6 +104,29 @@ body > * {
   line-height: 1.1;             /* very tight spacing */
 }
 
+/* put these in your <style> */
+.turn-tracker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.turn-tracker button {
+  padding: 6px 12px;
+  background: #4e7331;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.turn-tracker button:hover {
+  background: #3b531a;
+}
+.turn-tracker #roundDisplay {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
 
 .container {
   display: grid;
@@ -151,14 +174,39 @@ body > * {
 
 
 .player-info.selected {
+  border: 2px solid #ff9800;
+  position: relative; 
+  /* keep your normal parchment bg */
   background-image:
-    linear-gradient(rgba(255,235,59,0.6), rgba(255,235,59,0.6)),
     url('images/parchment-player2.png'),
     linear-gradient(#fffaf3, #fffaf3);
   background-size: cover;
   background-blend-mode: multiply;
-  /* adjust border, etc. as before */
-  border: 2px solid #ff9800;
+  position: relative;     /* for the pseudo‐element */
+}
+
+.player-info.selected::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #ffeb3b;            /* full-strength yellow */
+  mix-blend-mode: multiply;       /* deeper, richer tint */
+  opacity: 0.8;                   /* tweak between 0.6–1.0 until it’s bright enough */
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 1;
+}
+
+.player-info.selected > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* grey-out finished players */
+.player-info.finished {
+  filter: grayscale(100%);
+  opacity: 0.6;
+  /* you can tweak opacity or use another effect if you like */
 }
 
 
@@ -632,8 +680,99 @@ body > * {
   color: #6a4e23;
 }
 
+#bottomBar {
+  position: fixed;
+  bottom: 0;
+  left: 0; right: 0;
+  padding: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 999;
+  color: #4e342e;
+  border-top: 2px solid #8c7b5a;
+
+  /* tint color underneath */
+  background-color: rgba(78, 51, 46, 0.6);
+
+  /* your image on top of the tint */
+  background-image: url('images/parchment-player2.png');
+
+  /* make sure it covers the whole bar */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  /* blend the two so the color shows through */
+  background-blend-mode: multiply;
+}
 
 
+
+#bottomBar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  /* allow wrapping, so vertical stacks can form */
+  flex-wrap: wrap;
+}
+
+.btn-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+/* large “Next Round” button */
+#bottomBar .btn-big {
+  color: white;
+  background-color: #3b531a;
+  padding: 16px 24px;
+  font-size: 1.3rem;
+  border-radius: 4px;
+}
+
+/* the stacked “small” buttons */
+#bottomBar .btn-small {
+  color: white;
+  background-color: #333;
+  padding: 3px 10px;
+  font-size: 0.7rem;
+  border-radius: 4px;
+}
+
+#bottomBar .btn-big.hover {
+  background-color: #333;
+}
+
+#bottomBar .btn-small.hover {
+  background-color: #333;
+}
+
+#roundDisplay {
+  font-weight: bold;
+  min-width: 80px;
+  text-align: center;
+}
+@media screen and (min-width: 768px) and (orientation: landscape) {
+  /* Main control buttons */
+  .controls button {
+    padding: 16px 24px;     /* more touch-friendly padding */
+    font-size: 1.3rem;      /* bigger labels */
+  }
+  #bottomBar .btn-big {
+    padding: 20px 24px;     /* more touch-friendly padding */
+    font-size: 1.5rem;  
+  }
+  #bottomBar .btn-small {
+    padding: 5px 14px;     /* more touch-friendly padding */
+    font-size: 0.9rem;  
+  }
+
+
+
+}
     </style>
 </head>
 
@@ -650,8 +789,19 @@ Devised to be played with the base game using the cave's variant. <br>
 </p>
   </div>
 </div>
-
     
+<div id="bottomBar">
+  <span id="roundDisplay">Round: 1</span>
+  <button class="btn-big" onclick="nextRound()">Next Round</button>
+
+  <!-- wrap the two small buttons -->
+  <div class="btn-stack">
+    <button class="btn-small" onclick="finishSelectedPlayer()">Player Finished</button>
+    <button class="btn-small" onclick="confirmCalculateScores()">End Game/Scores</button>
+  </div>
+</div>
+
+
     <!-- Controls to manage the game -->
 <div class="controls">
 
@@ -668,11 +818,7 @@ Devised to be played with the base game using the cave's variant. <br>
     <!-- Confirmation box for Remove Player -->
 <div id="removeConfirmBox" class="confirm-box"></div>
 <!-- for simple “OK”‐style warnings -->
-<div
-  id="messageBox"
-  class="confirm-box"
-  onclick="hideMessage()"
-></div>
+<div id="messageBox" class="confirm-box"></div>
 
 <!-- for one‐time results like Throw Curse -->
 <div id="resultBox" class="result-box"></div>
@@ -814,9 +960,8 @@ Devised to be played with the base game using the cave's variant. <br>
         let enableThrow      = true;
         let enablePurge      = true;
         let cleanseDifficulty = 'normal';
+        let currentRound = 1;
 
-
-        
 
 
         // track treasures drawn
@@ -901,7 +1046,7 @@ function getRandomCurseCost() {
 const curses = [
   {
     name: "Heavy Idol",
-    icon: "🪨",
+    icon: "🗿",
     effect: "Each card only moves 1 space.",
     getBenefit: (cost) => {
       if (cost <= 2) return "Gain +2 movement action (one-time).";
@@ -956,7 +1101,7 @@ const curses = [
   },
   {
     name: "Manuka Honey",
-    icon: "🖐️",
+    icon: "🍯",
     effect: "Pay 1 extra coin per card purchase.",
     getBenefit: (cost) => {
       if (cost <= 2) return "Gain 2 extra gold.";
@@ -986,7 +1131,62 @@ const curses = [
       if (cost >= 4) return  "Draw 3 additional cards and gain two action phases to use 2 cards per movement.";
       if (cost >= 8) return "Gain Heroic blessing: 5 addition cards.";
     }
+  },
+{
+  name: "Jeering Monkey",
+  icon: "🐒",
+  effect: "Player to your left picks card randomly from your hand to discard. You can choose to trash it instead.",
+  getBenefit: (cost) => {
+    if (cost <= 2) return "Gain 1 extra card next turn.";
+    if (cost === 3) return "Gain 2 cards next turn and +1 gold.";
+    if (cost >= 4) return "Gain 3 cards and immunity from next curse.";
+    if (cost >= 8) return "Heroic Monkey Escape: 4 gold, +3 cards, and move through water as jungle next turn!";
   }
+},
+{
+  name: "Map Fragment",
+  icon: "🧾",
+  effect: "Cannot use purples cards.",
+  getBenefit: (cost) => {
+    if (cost <= 2) return "Draw 2 cards next turn.";
+    if (cost === 3) return "Draw 2 cards and skip discard next turn.";
+    if (cost >= 4) return "Gain any purple card to your discard pile.";
+    if (cost >= 8) return "Heroic Insight: +4 gold, draw 3 cards, AND gain any purple card to your discard pile.";
+  }
+},
+{
+  name: "Stone Toad",
+  icon: "🐸",
+  effect: "You cannot use blue cards for movement.",
+  getBenefit: (cost) => {
+    if (cost <= 2) return "Gain 2 blue movement this turn.";
+    if (cost === 3) return "Gain 3 blue movement and draw a card.";
+    if (cost >= 4) return "Gain 4 blue movement, draw 2 cards.";
+    if (cost >= 8) return "Heroic Amphibian Boost: Use all cards as blue for movement and +3 gold, draw 2 cards.";
+  }
+},
+{
+  name: "Golden Flea",
+  icon: "🐞",
+  effect: "You must draw 1 fewer card and play with your hand face up.",
+  getBenefit: (cost) => {
+    if (cost <= 2) return "Gain +1 stash gold and draw an extra card.";
+    if (cost === 3) return "Gain 2 gold and skip draw penalty next turn.";
+    if (cost >= 4) return "Gain 3 gold, +1 draw each turn until next curse.";
+    if (cost >= 8) return "Flea Market Fortune: 6 gold, +2 draw next turn, and immunity to your next curse!";
+  }
+},
+{
+  name: "Possessed Coin",
+  icon: "🪙",
+  effect: "Your current stash is frozen and unusable.",
+  getBenefit: (cost) => {
+    if (cost <= 2) return "Gain 2 usable coins immediately.";
+    if (cost === 3) return "Gain 3 coins and may refund 1 card this turn.";
+    if (cost >= 4) return "Gain 4 coins and buy cards at -1 cost this turn.";
+    if (cost >= 8) return "Heroic Windfall: 8 coins, +1 card, and you may buy 2 cards.";
+  }
+},
 ];
 
 
@@ -1008,7 +1208,8 @@ const curses = [
                 bonusCleansing: false,
                 discount: 0,
                 autoDiscoverTreasure: false,
-                hasHeroCard: false
+                hasHeroCard: false,
+                finishRound: null   
             });
 
             updateDisplay();
@@ -1206,18 +1407,23 @@ function purge(skipCost = false) {
 
   // 3) Generate and store the purge perk:
   const purgeBenefits = [
-    "📜 <strong>Blessing of the Ancients:</strong> <i><strong>KEEP</strong></i> Reduces future card purchase costs by 1 gold.",
+    "📜 <strong>Blessing of the Ancients:</strong> <i><strong>KEEP.</strong></i> Reduces future card purchase costs by 1 gold.",
     "🕊️ <strong>Spirit Guide:</strong> Grants immunity to the next curse encountered.",
     "🏴‍☠️ <strong>Treasure Hunter's Instinct:</strong> Automatically discovers the nearest treasure without movement.",
-    "🧭 <strong>Pathfinder's Insight:</strong> <i><strong>KEEP</strong></i> +1 movement on 1 card each turn.",
-    "🌟 <strong>El Dorado's Favor:</strong> Draw 2 cards. <strong>Win any tiebreak.</strong>",
-    "🧙 <strong>Wizard's Friend:</strong> Your next Cleansing Ritual will be Upgraded to a Purge!"
+    "🧭 <strong>Pathfinder's Insight:</strong> <i><strong>KEEP.</strong></i> +1 movement on 1 card each turn.",
+    "🌟 <strong>El Dorado's Favor:</strong> <i><strong>KEEP.</strong></i> Draw an extra card every turn. <strong>Win any tiebreak.</strong>",
+    "🧙 <strong>Wizard's Friend:</strong> Your next Cleansing Ritual will be Upgraded to a Purge!",
+    "🛒 <strong>Shopaholic:</strong> <i><strong>KEEP.</strong></i> Can purchase 2 cards each turn.",
+    "👀 <strong>Keen Eyes:</strong> <i><strong>KEEP.</strong></i> <i>Throw Curse</i> accuracy increased up to a 75% hitrate.",
+    "🤠 <strong>Bully:</strong> Can move through other players pawns <strong>twice.</strong>"
   ];
   const perk = purgeBenefits[Math.floor(Math.random() * purgeBenefits.length)];
   player.purgeBenefits.push(perk);
 
   // 4) Apply any immediate game-state effects from the perk:
   if (perk.includes("Spirit Guide")) {
+    player.immunity = true;
+  }   if (perk.includes("immunity")) {
     player.immunity = true;
   } else if (perk.includes("Treasure Hunter's Instinct")) {
     setTimeout(() => drawTreasureWithoutShrineCheck(), 0);
@@ -1279,78 +1485,79 @@ function throwCurse() {
 
 
         // Update the display for player information
-        function updateDisplay() {
-            const playersContainer = document.getElementById("playersContainer");
-            playersContainer.innerHTML = "";
+function updateDisplay() {
+  const playersContainer = document.getElementById("playersContainer");
+  playersContainer.innerHTML = "";
 
-            players.forEach((player, index) => {
-                const playerDiv = document.createElement("div");
-                playerDiv.className = "player-info";
-                if (index === selectedPlayerIndex) {
-                    playerDiv.classList.add("selected");
-                }
-
-                if (player.curse) {
-  playerDiv.classList.add("cursed");
+  players.forEach((player, index) => {
+    const playerDiv = document.createElement("div");
+    playerDiv.className = "player-info";
+    if (index === selectedPlayerIndex) {
+      playerDiv.classList.add("selected");
+    }
+    if (player.curse) {
+      playerDiv.classList.add("cursed");
+    }
+    if (player.finishRound != null) {
+      playerDiv.classList.add("finished");
 }
 
-                        const removeBtnHTML = (index === selectedPlayerIndex)
-          ? `<button class="remove-btn" onclick="showRemoveConfirm(selectedPlayerIndex)">×</button>`
-          : "";
+    playerDiv.innerHTML = `
+      <div class="player-name-bar">
+        <button class="name-btn" onclick="selectPlayer(${index})">
+          ${player.name}
+        </button>
+        <button class="remove-btn" onclick="showRemoveConfirm(${index})">×</button>
+      </div>
+      <div class="token">Treasures: ${player.treasures}</div>
+      <div class="curse">
+        ${player.curse ? `
+          <span class="curse-icon">${player.curse.icon}</span> 
+          <strong>${player.curse.name}:</strong> ${player.curse.effect}
+          <div class="cleanse-cost">
+            <strong>Cleanse Cost:</strong> ${player.curse.cost} gold
+          </div>
+        ` : "No curse"}
+      </div>
+      <div class="stash-controls">
+        <button onclick="changeStash(${index}, -1)">-</button>
+        <span>Stash: ${player.stash} Gold</span>
+        <button onclick="changeStash(${index}, 1)">+</button>
+      </div>
 
-                playerDiv.innerHTML = `
-<div class="player-name-bar">
-  <button class="name-btn" onclick="selectPlayer(${index})">
-    ${player.name}
-  </button>
-  <button class="remove-btn" onclick="showRemoveConfirm(${index})">×</button>
-</div>
-            <div class="token">Treasures: ${player.treasures}</div>
-            <div class="curse">
-                ${player.curse ? `
-                    <span class="curse-icon">${player.curse.icon}</span> 
-                    <strong>${player.curse.name}:</strong> ${player.curse.effect}
-                    <div class="cleanse-cost"><strong>Cleanse Cost:</strong> ${player.curse.cost} gold</div>
-                ` : "No curse"}
+      ${player.benefitMessage ? `
+        <div class="benefit cleanse-benefit">
+          <strong>Cleanse Benefit:</strong> ${player.benefitMessage}
+          <button class="clear-benefit-btn"
+                  onclick="clearCleansingBenefit(${index})">
+            Clear Cleanse Benefit
+          </button>
+        </div>
+      ` : ""}
+
+      ${player.purgeBenefits
+        .map((perk, pIdx) => {
+          const isKeep = perk.includes("KEEP");
+          return `
+            <div class="benefit purge-benefit">
+              <strong>Purge Perk:</strong><br>${perk}
+              <button class="clear-benefit-btn"
+                      ${isKeep
+                        ? "disabled"
+                        : `onclick="clearPurgePerk(${index}, ${pIdx})"`}>
+                Clear Purge Perk
+              </button>
             </div>
-            <div class="stash-controls">
-                <button onclick="changeStash(${index}, -1)">-</button>
-                <span>Stash: ${player.stash} Gold</span>
-                <button onclick="changeStash(${index}, 1)">+</button>
-            </div>
-
-${player.benefitMessage ? `
-  <div class="benefit cleanse-benefit">
-    <strong>Cleanse Benefit:</strong> ${player.benefitMessage}
-    <button class="clear-benefit-btn" onclick="clearCleansingBenefit(${index})">
-      Clear Cleanse Benefit
-    </button>
-  </div>
-            ` : ""}
-
-${player.purgeBenefits.map((perk, pIdx) => {
-  const isKeep = perk.includes('KEEP');
-  return `
-    <div class="benefit purge-benefit">
-      <strong>Purge Perk:</strong> <br>${perk}
-      <button
-        class="clear-benefit-btn"
-        ${isKeep
-          ? 'disabled'
-          : `onclick="clearPurgePerk(${index}, ${pIdx})"`}
-      >
-        Clear Purge Perk
-      </button>
-    </div>
-  `;
-}).join('')}
+          `;
+        })
+        .join("")}
 
 
-        `;
+    `;
 
-                playersContainer.appendChild(playerDiv);
-            });
-        }
+    playersContainer.appendChild(playerDiv);
+  });
+}
 
 
         // Change stash amount (Add or subtract gold)
@@ -1362,6 +1569,39 @@ ${player.purgeBenefits.map((perk, pIdx) => {
                 updateDisplay();
             }
         }
+
+function calculateScores() {
+  // 1) Build a summary for each player
+  const lines = players.map(p => {
+    // use finishRound if set, otherwise currentRound
+    const rounds = p.finishRound != null ? p.finishRound : currentRound;
+    const treasurePenalty = Math.floor(p.treasures / 2);
+    const score = rounds - treasurePenalty;
+    return `${p.name}: ${rounds} rounds – ${treasurePenalty} = ${score}`;
+  });
+
+  // 2) Find the lowest score
+  const scores = players.map(p => {
+    const rounds = p.finishRound != null ? p.finishRound : currentRound;
+    return rounds - Math.floor(p.treasures / 2);
+  });
+  const best = Math.min(...scores);
+  const winners = players
+    .filter((p,i) => ( (p.finishRound!=null? p.finishRound:currentRound) - Math.floor(p.treasures/2) ) === best)
+    .map(p=>p.name)
+    .join(', ');
+
+  // 3) Show it
+  showMessage(`
+    <p><strong>Final scores:</strong></p>
+    <p>${lines.join('<br>')}</p>
+    <p>🏆 Winner${winners.includes(',') ? 's' : ''}: ${winners}</p>
+  `);
+
+
+  showResult(html);
+}
+
 
 function clearThrowUI() {
   // exit throw mode
@@ -1679,10 +1919,67 @@ function hideResult() {
 window.addEventListener('DOMContentLoaded', () => {
   hideMessage();
   hideResult();
+  updateRoundDisplay();
 });
+
+function updateRoundDisplay() {
+  document.getElementById('roundDisplay').textContent = `Round: ${currentRound}`;
+}
+
+function nextRound() {
+  currentRound++;
+  updateRoundDisplay();
+}
+
+function prevRound() {
+  if (currentRound > 1) {
+    currentRound--;
+    updateRoundDisplay();
+  }
+}
+
+// call this when the “Player Finished” button is clicked:
+function finishSelectedPlayer() {
+  if (selectedPlayerIndex === null) {
+    return showMessage("Select a player first.");
+  }
+  const p = players[selectedPlayerIndex];
+  if (p.finishRound == null) {
+    p.finishRound = currentRound;
+    updateDisplay();
+  }
+}
+// 1) Ask “Are you sure?” then run finishSelectedPlayer()
+function confirmFinish() {
+  showConfirm(
+    'Mark this player as finished?',
+    'finishSelectedPlayer'
+  );
+}
+
+function confirmCalculateScores() {
+  showConfirm(
+    'Are you sure you want to calculate final scores?',
+    'calculateScores'
+  );
+}
+
+
+// (Your existing showConfirm helper:)
+function showConfirm(text, onYesFnName) {
+  const box = document.getElementById('messageBox');   // reuse your messageBox
+  box.innerHTML = `
+    <button class="clear-result" onclick="hideMessage()">×</button>
+    <p>${text}</p>
+    <button class="btn btn-yes" onclick="hideMessage(); ${onYesFnName}();">Yes</button>
+    <button class="btn btn-no" onclick="hideMessage()">No</button>
+  `;
+  box.style.display = 'block';
+}
 
     </script>
 <script>
+  
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('service-worker.js')
     .then(() => console.log('Service Worker registered'))
