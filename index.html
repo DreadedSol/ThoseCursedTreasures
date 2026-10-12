@@ -452,6 +452,32 @@ body > * {
             font-weight: normal;
         }
 
+        .player-info button.cleanse-cost-button {
+            display: block;
+            width: fit-content;
+            max-width: 100%;
+            margin: 4px auto 0;
+            padding: 5px 10px;
+            border: 0;
+            border-radius: 5px;
+            background: #4e7331;
+            color: white;
+            font: inherit;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .player-info button.cleanse-cost-button:hover:not(:disabled) {
+            background: #3b531a;
+        }
+
+        .player-info button.cleanse-cost-button:disabled {
+            background: #9a9182;
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
         .token {
             margin-top: 10px;
             font-weight: bold;
@@ -816,101 +842,176 @@ body > * {
   position: fixed;
   bottom: 0;
   left: 0; right: 0;
-  padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.5rem;
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
   z-index: 999;
   color: #4e342e;
   border-top: 2px solid #8c7b5a;
-
-  /* tint color underneath */
   background-color: rgba(207, 175, 127, 0.6);
-
-  /* your image on top of the tint */
   background-image: url('images/parchment-player2.png');
-
-  /* make sure it covers the whole bar */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-
-  /* blend the two so the color shows through */
   background-blend-mode: multiply;
 }
 
+#bottomBar .bottom-bar-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  width: min(100%, 760px);
+  margin: 0 auto;
+}
 
-
-#bottomBar {
+#bottomBar .bottom-bar-primary,
+#bottomBar .bottom-bar-more {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  /* allow wrapping, so vertical stacks can form */
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+
+#bottomBar .bottom-bar-primary {
+  flex-wrap: nowrap;
+}
+
+#bottomBar .bottom-bar-more {
   flex-wrap: wrap;
 }
 
-.btn-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
+#bottomBar .settings-container {
+  position: static;
+  left: auto;
+  transform: none;
+  box-sizing: border-box;
+  flex: 1 1 100%;
+  width: min(100%, 560px);
+  max-width: 560px;
+  margin: 0 auto;
+  background: rgba(255, 250, 240, 0.9);
 }
 
-/* large “Next Round” button */
+#bottomBar .settings-container.settings-collapsed {
+  flex: 0 1 auto;
+  width: auto;
+  max-width: none;
+  padding: 0;
+  background: transparent;
+}
+
+#bottomBar .settings {
+  justify-content: center;
+  margin: 0;
+}
+
+#bottomBar button#settingsToggle {
+  width: auto;
+  margin: 0;
+  padding: 4px 8px;
+  background: transparent;
+  color: #6a4e23;
+  font-size: 1.1rem;
+}
+
+#bottomBar .bottom-bar-more[hidden],
+#bottomBar .bottom-bar-content[hidden],
+#bottomBar .bottom-bar-reopen[hidden] {
+  display: none;
+}
+
+#bottomBar .bottom-bar-reopen {
+  display: block;
+  margin: 0 auto;
+}
+
+#bottomBar button {
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 6px;
+  color: white;
+  font: inherit;
+  font-weight: bold;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
 #bottomBar .btn-big {
   color: white;
   background-color: #3b531a;
-  padding: 16px 24px;
-  font-size: 1.3rem;
-  border-radius: 5px;      /* rounded corners like the rest */
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  text-align: center;
+  padding: 10px 16px;
+  font-size: 1rem;
 }
 
-/* the stacked “small” buttons */
-#bottomBar .btn-small {
+#bottomBar .btn-small,
+#bottomBar .btn-water,
+#bottomBar .bottom-bar-toggle,
+#bottomBar .bottom-bar-reopen {
   color: white;
-  background-color: #333;
-  padding: 3px 10px;
-  font-size: 0.7rem;
-  border-radius: 4px;
+  background-color: #007ACC;
+  padding: 8px 12px;
+  font-size: 0.9rem;
 }
 
-#bottomBar .btn-big.hover {
+#bottomBar .btn-small {
   background-color: #333;
 }
 
-#bottomBar .btn-small.hover {
-  background-color: #333;
+#bottomBar .bottom-bar-toggle,
+#bottomBar .bottom-bar-reopen {
+  background-color: #8c7b5a;
 }
 
 #roundDisplay {
   font-weight: bold;
-  min-width: 80px;
+  min-width: 58px;
   text-align: center;
+  white-space: nowrap;
 }
-@media screen and (min-width: 768px) and (orientation: landscape) {
-  /* Main control buttons */
+
+#bottomBar button:hover {
+  filter: brightness(0.9);
+}
+
+@media screen and (min-width: 768px) {
   .controls button {
-    padding: 16px 24px;     /* more touch-friendly padding */
-    font-size: 1.3rem;      /* bigger labels */
-  }
-  #bottomBar .btn-big {
-    padding: 20px 24px;     /* more touch-friendly padding */
-    font-size: 1.5rem;  
-  }
-  #bottomBar .btn-small {
-    padding: 5px 14px;     /* more touch-friendly padding */
-    font-size: 0.9rem;  
-  }
-  #bottomBar .btn-water {
     padding: 16px 24px;
-    font-size: 1.3;
+    font-size: 1.3rem;
   }
 
+  #bottomBar .btn-big {
+    padding: 12px 20px;
+    font-size: 1.1rem;
+  }
+}
 
+@media screen and (max-width: 480px) {
+  #bottomBar {
+    padding-right: 6px;
+    padding-left: 6px;
+  }
 
+  #bottomBar .bottom-bar-primary,
+  #bottomBar .bottom-bar-more {
+    gap: 4px;
+  }
+
+  #bottomBar .btn-big {
+    padding: 7px 9px;
+    font-size: 0.85rem;
+  }
+
+  #bottomBar .btn-water,
+  #bottomBar .bottom-bar-toggle,
+  #bottomBar .bottom-bar-reopen {
+    padding: 6px 8px;
+    font-size: 0.8rem;
+  }
+
+  #roundDisplay {
+    min-width: 48px;
+    font-size: 0.85rem;
+  }
 }
     </style>
 </head>
@@ -930,16 +1031,56 @@ Devised to be played with the base game using the cave's variant. <br>
 </div>
     
 <div id="bottomBar">
-  <span id="roundDisplay">Round: 1</span>
-  <button class="btn-big" onclick="nextRound()">Next Round</button>
-
-  <!-- wrap the two small buttons -->
-  <div class="btn-stack">
-    <button class="btn-small" onclick="finishSelectedPlayer()">Player Finished</button>
-    <button class="btn-small" onclick="confirmCalculateScores()">End Game/Scores</button>
+  <button
+    class="bottom-bar-reopen"
+    id="bottomBarReopen"
+    onclick="setBottomBarCollapsed(false)"
+    aria-expanded="false"
+    aria-controls="bottomBarContent"
+    hidden
+  >Show game controls ▲</button>
+  <div class="bottom-bar-content" id="bottomBarContent">
+    <div class="bottom-bar-primary">
+      <span id="roundDisplay">Round: 1</span>
+      <button class="btn-big" onclick="nextRound()">Next Round</button>
+      <button class="btn-water" onclick="undo()">Undo</button>
+      <button
+        class="bottom-bar-toggle"
+        id="bottomBarMoreToggle"
+        onclick="toggleBottomBarMore()"
+        aria-expanded="false"
+        aria-controls="bottomBarMore"
+        aria-label="More controls"
+        title="More controls"
+      >+</button>
+      <button
+        class="bottom-bar-toggle"
+        onclick="setBottomBarCollapsed(true)"
+        aria-label="Collapse game controls"
+        title="Collapse game controls"
+      >⌄</button>
+    </div>
+    <div class="bottom-bar-more" id="bottomBarMore" hidden>
+      <button class="btn-small" onclick="finishSelectedPlayer()">Player Finished</button>
+      <button class="btn-small" onclick="confirmCalculateScores()">End Game/Scores</button>
+      <button class="btn-water" onclick="toggleRulesMenu()">Rules</button>
+      <div class="settings-container">
+        <button id="settingsToggle" aria-expanded="true" aria-controls="gameSettings">⚙️ Settings</button>
+        <div class="settings" id="gameSettings">
+          <label>
+            Cleanse Cost:
+            <select id="cleanseDifficulty">
+              <option value="easy">Cheap</option>
+              <option value="normal" selected>Normal</option>
+              <option value="hard">Extortion</option>
+            </select>
+          </label>
+          <label><input type="checkbox" id="togglePurge" checked> Enable Purge</label>
+          <label><input type="checkbox" id="toggleThrow" checked> Enable Throw Curse</label>
+        </div>
+      </div>
+    </div>
   </div>
-    <button class="btn-water"     onclick="toggleRulesMenu()">Rules</button>
-  <button class="btn-water"     onclick="undo()">Undo</button>
 </div>
 
 
@@ -1073,23 +1214,6 @@ Devised to be played with the base game using the cave's variant. <br>
         <!-- Player info will be inserted here dynamically -->
     </div>
 
-
-    <div class="settings-container">
-  <button id="settingsToggle" aria-expanded="true">⚙️</button>
-    <div class="settings">
-        <label>
-    Cleanse Cost:
-    <select id="cleanseDifficulty">
-      <option value="easy">Cheap</option>
-      <option value="normal" selected>Normal</option>
-      <option value="hard">Extortion</option>
-    </select>
-  </label>
-  <label><input type="checkbox" id="togglePurge" checked> Enable Purge</label>
-  <label><input type="checkbox" id="toggleThrow" checked> Enable Throw Curse</label>
-
-</div>
-</div>
 
     <script>
         let players = [];
@@ -1478,11 +1602,12 @@ function drawTreasure() {
 
 
         // Function to display the shrine when the right turn comes
-function useRitual() {
-  if (selectedPlayerIndex === null) {
+function useRitual(playerIndex = selectedPlayerIndex) {
+  if (playerIndex === null || !players[playerIndex]) {
     return showMessage("Please select a player.");
   }
-  const player = players[selectedPlayerIndex];
+  selectedPlayerIndex = playerIndex;
+  const player = players[playerIndex];
 
   // 1) Must have a curse
   if (!player.curse) {
@@ -1494,7 +1619,7 @@ function useRitual() {
     saveHistory();
     player.bonusCleansing = false;
     showMessage("🔮 Wizard's Friend activates! This ritual is upgraded to a FREE Purge!");
-    purge(true, false);
+    purge(true, false, playerIndex);
     return;
   }
 
@@ -1524,13 +1649,14 @@ function useRitual() {
 // ————————————————
 // 1) Update purge() to accept skipCost
 // ————————————————
-function purge(skipCost = false, recordHistory = true) {
+function purge(skipCost = false, recordHistory = true, playerIndex = selectedPlayerIndex) {
   if (!enablePurge) return showMessage("Purge is currently disabled in settings.");
-  if (selectedPlayerIndex === null) {
+  if (playerIndex === null || !players[playerIndex]) {
     showMessage("Please select a player.");
     return;
   }
-  const player = players[selectedPlayerIndex];
+  selectedPlayerIndex = playerIndex;
+  const player = players[playerIndex];
   if (!player.curse) {
     showMessage("No curse to remove.");
     return;
@@ -1677,7 +1803,13 @@ function updateDisplay() {
               <strong class="curse-item-title">${player.curse.name}</strong>
               <div>${player.curse.effect}</div>
               <div class="cleanse-cost">
-                <strong>Cleanse Cost:</strong> ${player.curse.cost} gold
+                <button
+                  class="cleanse-cost-button"
+                  onclick="useRitual(${index})"
+                  ${player.bonusCleansing || player.stash >= player.curse.cost ? "" : "disabled"}
+                >
+                  ${player.bonusCleansing ? "Cleanse for free" : `Cleanse for ${player.curse.cost} gold`}
+                </button>
               </div>
             </div>
           </div>
@@ -2102,6 +2234,20 @@ function updateRoundDisplay() {
   document.getElementById('roundDisplay').textContent = `Round: ${currentRound}`;
 }
 
+function toggleBottomBarMore() {
+  const more = document.getElementById('bottomBarMore');
+  const toggle = document.getElementById('bottomBarMoreToggle');
+  more.hidden = !more.hidden;
+  toggle.setAttribute('aria-expanded', String(!more.hidden));
+}
+
+function setBottomBarCollapsed(collapsed) {
+  document.getElementById('bottomBarContent').hidden = collapsed;
+  const reopenButton = document.getElementById('bottomBarReopen');
+  reopenButton.hidden = !collapsed;
+  reopenButton.setAttribute('aria-expanded', String(!collapsed));
+}
+
 function nextRound() {
   saveHistory();
   currentRound++;
@@ -2192,6 +2338,7 @@ const settingsPanel  = document.querySelector('.settings');
 
 settingsToggle.addEventListener('click', () => {
   const isHidden = settingsPanel.classList.toggle('collapsed');
+  settingsToggle.closest('.settings-container').classList.toggle('settings-collapsed', isHidden);
   settingsToggle.setAttribute('aria-expanded', !isHidden);
 });
 
