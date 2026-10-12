@@ -602,20 +602,24 @@ body > * {
         }
 
 
-        .clear-benefit-btn {
+        .player-info button.clear-benefit-btn {
             display: block;
-            margin-top: 10px;
+            margin-top: 6px;
+            margin-left: auto;
             background: none;
             border: none;
             color: #b45f06;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             cursor: pointer;
             font-weight: bold;
             text-align: right;
+            width: fit-content;
+            padding: 0;
+            margin-bottom: 0;
         }
 
         .clear-benefit-btn:hover {
-            color: white;
+            color: #333;
         }
 
         .clear-benefit-btn[disabled] {
@@ -637,14 +641,24 @@ body > * {
   border-left: 5px solid #ff9800; /* your orange button color */
 }
 
-/* Cleanse Benefit: on hover, green accent */
-.benefit.cleanse-benefit .clear-benefit-btn:hover {
-  background-color: #4e7331;  /* same as your .btn-action green */
+/* Cleanse Benefit clear button: green, shifting to orange on hover */
+.benefit.cleanse-benefit .clear-benefit-btn {
+  color: #4e7331;
 }
 
-/* Purge Perk: on hover, orange accent */
+.benefit.cleanse-benefit .clear-benefit-btn:hover {
+  background-color: transparent;
+  color: #b45f06;
+}
+
+/* Purge Perk clear button: orange, shifting to green on hover */
+.benefit.purge-benefit .clear-benefit-btn {
+  color: #b45f06;
+}
+
 .benefit.purge-benefit .clear-benefit-btn:hover {
-  background-color: #ff9800;  /* same as your .btn-yellow */
+  background-color: transparent;
+  color: #4e7331;
 }
 
 
@@ -1099,6 +1113,13 @@ body > * {
     font-size: 0.8rem;
   }
 
+  #bottomBar .bottom-bar-more > .dock-add-player,
+  #bottomBar .bottom-bar-more > .btn-small,
+  #bottomBar .bottom-bar-more > .btn-water {
+    padding: 6px 9px;
+    font-size: 0.8rem;
+  }
+
   #roundDisplay {
     min-width: 48px;
     font-size: 0.85rem;
@@ -1120,6 +1141,13 @@ body > * {
   #bottomBar .btn-water,
   #bottomBar .bottom-bar-toggle {
     padding: 4px 5px;
+    font-size: 0.7rem;
+  }
+
+  #bottomBar .bottom-bar-more > .dock-add-player,
+  #bottomBar .bottom-bar-more > .btn-small,
+  #bottomBar .bottom-bar-more > .btn-water {
+    padding: 4px 6px;
     font-size: 0.7rem;
   }
 
@@ -1251,6 +1279,7 @@ Devised to be played with the base game using the cave's variant. <br>
 
 <h3>Advanced:💥 Purge!</h3>
 <p>You may choose to <strong>double the cleanse cost</strong> of your curse to perform a Purge!</p>
+<p><strong>Wizard's Friend</strong> upgrades your next Cleansing Ritual to a Purge: you still pay the normal cleanse cost, but not the additional cost to Purge.</p>
 <p>Purge removes your curse and grants both:</p>
 <ol>
   <li>The normal cleansing benefit of the curse.</li>
@@ -1618,6 +1647,7 @@ const curses = [
                 benefitMessage: '', // ← this is cleanse benefit (your existing code)
                 purgeBenefits: [],          // ← now an array you can push into
                 immunity: false,
+                spiritGuideActive: false,
                 skipNextCurse: false,
                 bonusCleansing: false,
                 discount: 0,
@@ -1639,6 +1669,17 @@ const curses = [
 
 
 
+
+function consumeCurseImmunity(player) {
+  player.immunity = false;
+  if (!player.spiritGuideActive) return;
+
+  const spiritGuideIndex = player.purgeBenefits.findIndex(perk => perk.includes("Spirit Guide"));
+  if (spiritGuideIndex !== -1) {
+    player.purgeBenefits.splice(spiritGuideIndex, 1);
+  }
+  player.spiritGuideActive = false;
+}
 
 function drawTreasure() {
   if (selectedPlayerIndex === null) {
@@ -1662,7 +1703,7 @@ function drawTreasure() {
 
   // 3) If they have Spirit Guide immunity, consume it and stop here:
   if (player.immunity) {
-    player.immunity = false;
+    consumeCurseImmunity(player);
     showResult("🕊️ Your Spirit Guide protects you — you resist this curse!");
     updateDisplay();
     return;
@@ -1690,7 +1731,7 @@ function drawTreasure() {
             if (recordHistory) saveHistory();
 
             if (player.immunity) {
-    player.immunity = false;
+    consumeCurseImmunity(player);
     showResult("🕊️ Your Spirit Guide protects you — you resist this curse!");
     updateDisplay();
     return;
@@ -1750,35 +1791,41 @@ function useRitual(playerIndex = selectedPlayerIndex) {
     return showMessage("No curse to remove.");
   }
 
-  // 2) Free‐purge upgrade?
-  if (player.bonusCleansing) {
-    saveHistory();
-    player.bonusCleansing = false;
-    showMessage("🔮 Wizard's Friend activates! This ritual is upgraded to a FREE Purge!");
-    purge(true, false, playerIndex);
-    return;
-  }
-
-  // 3) Check gold
   const stash = Number(player.stash);
   const cost  = Number(player.curse.cost);
   if (stash < cost) {
-    return showMessage("Not enough gold.");
+    return showMessage("Not enough gold for the cleansing ritual.");
   }
 
   saveHistory();
 
-  // 4) Deduct cost
+  // Wizard's Friend waives only the additional cost of a Purge.
+  if (player.bonusCleansing && enablePurge) {
+    player.stash = stash - cost;
+    player.bonusCleansing = false;
+    showMessage("🔮 Wizard's Friend upgrades this ritual to a Purge! The normal cleanse cost was paid.");
+    purge(true, false, playerIndex);
+    return;
+  }
+
+  // 1) Deduct the normal cleanse cost.
   player.stash = stash - cost;
 
-  // 5) Capture benefit *before* clearing the curse
+  // 2) Capture benefit *before* clearing the curse.
   const benefitMsg = player.curse.getBenefit(cost);
   player.benefitMessage = benefitMsg;
 
-  // 6) Finally clear the curse
+  // A regular cleanse consumes Wizard's Friend if Purge is disabled.
+  const consumedWizardFriend = player.bonusCleansing;
+  player.bonusCleansing = false;
+
+  // 3) Finally clear the curse.
   player.curse = null;
 
   updateDisplay();
+  if (consumedWizardFriend) {
+    showMessage("Purge is disabled. Wizard's Friend was consumed without upgrading this ritual.");
+  }
 }
 
 
@@ -1820,14 +1867,14 @@ function purge(skipCost = false, recordHistory = true, playerIndex = selectedPla
 
   // 3) Generate and store the purge perk:
   const purgeBenefits = [
-    "📜 <strong>Blessing of the Ancients:</strong> <i><strong>KEEP.</strong></i> Reduces future card purchase costs by 1 gold.",
+    "📜 <strong>Blessing of the Ancients:</strong> Reduces future card purchase costs by 1 gold. <strong>KEEP.</strong>",
     "🕊️ <strong>Spirit Guide:</strong> Grants immunity to the next curse encountered.",
     "🏴‍☠️ <strong>Treasure Hunter's Instinct:</strong> Automatically discovers the nearest treasure without movement.",
-    "🧭 <strong>Pathfinder's Insight:</strong> <i><strong>KEEP.</strong></i> +1 movement on 1 card each turn.",
-    "🌟 <strong>El Dorado's Favor:</strong> <i><strong>KEEP.</strong></i> Draw an extra card every turn. <strong>Win any tiebreak.</strong>",
+    "🧭 <strong>Pathfinder's Insight:</strong> +1 movement on 1 card each turn. <strong>KEEP.</strong>",
+    "🌟 <strong>El Dorado's Favor:</strong> Draw an extra card every turn. <strong>Win any tiebreak.</strong> <strong>KEEP.</strong>",
     "🧙 <strong>Wizard's Friend:</strong> Your next Cleansing Ritual will be Upgraded to a Purge!",
-    "🛒 <strong>Shopaholic:</strong> <i><strong>KEEP.</strong></i> Can purchase 2 cards each turn.",
-    "👀 <strong>Keen Eyes:</strong> <i><strong>KEEP.</strong></i> <i>Throw Curse</i> accuracy increased up to a 75% hitrate.",
+    "🛒 <strong>Shopaholic:</strong> Can purchase 2 cards each turn. <strong>KEEP.</strong>",
+    "👀 <strong>Keen Eyes:</strong> <i>Throw Curse</i> accuracy increased up to a 75% hitrate. <strong>KEEP.</strong>",
     "🤠 <strong>Bully:</strong> Can move through other players pawns <strong>twice.</strong>"
   ];
   const perk = purgeBenefits[Math.floor(Math.random() * purgeBenefits.length)];
@@ -1836,6 +1883,7 @@ function purge(skipCost = false, recordHistory = true, playerIndex = selectedPla
   // 4) Apply any immediate game-state effects from the perk:
   if (perk.includes("Spirit Guide")) {
     player.immunity = true;
+    player.spiritGuideActive = true;
   }   if (perk.includes("immunity")) {
     player.immunity = true;
   } else if (perk.includes("Treasure Hunter's Instinct")) {
@@ -1948,11 +1996,13 @@ function updateDisplay() {
               <div>${player.curse.effect}</div>
               <div class="cleanse-cost">
                 <button
-                  class="cleanse-cost-button"
+                  class="cleanse-cost-button ${player.bonusCleansing && enablePurge ? "purge-cost-button" : ""}"
                   onclick="useRitual(${index})"
-                  ${player.bonusCleansing || player.stash >= player.curse.cost ? "" : "disabled"}
+                  ${player.stash >= player.curse.cost ? "" : "disabled"}
                 >
-                  ${player.bonusCleansing ? "Cleanse (FREE)" : `Cleanse (${player.curse.cost})`}
+                  ${player.bonusCleansing && enablePurge
+                    ? `Purge Upgrade (cleanse ${player.curse.cost})`
+                    : `Cleanse (${player.curse.cost})`}
                 </button>
                 ${enablePurge && player.stash >= player.curse.cost * 2 ? `
                   <button
@@ -1996,15 +2046,16 @@ function updateDisplay() {
       ${player.purgeBenefits
         .map((perk, pIdx) => {
           const isKeep = perk.includes("KEEP");
+          const clearsAutomatically = perk.includes("Spirit Guide");
           return `
             <div class="benefit purge-benefit">
               <strong>Purge Perk:</strong><br>${perk}
-              <button class="clear-benefit-btn"
-                      ${isKeep
-                        ? "disabled"
-                        : `onclick="clearPurgePerk(${index}, ${pIdx})"`}>
-                Clear Purge Perk
-              </button>
+              ${isKeep || clearsAutomatically ? "" : `
+                <button class="clear-benefit-btn"
+                        onclick="clearPurgePerk(${index}, ${pIdx})">
+                  Clear Purge Perk
+                </button>
+              `}
             </div>
           `;
         })
