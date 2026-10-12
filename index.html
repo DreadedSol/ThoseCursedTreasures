@@ -1001,6 +1001,13 @@ Devised to be played with the base game using the cave's variant. <br>
         let shrinePlaced = false;
 
 window.addEventListener('DOMContentLoaded', () => {
+  const bottomBar = document.getElementById('bottomBar');
+  const updateBottomBarSpace = () => {
+    document.body.style.paddingBottom = `${bottomBar.offsetHeight + 20}px`;
+  };
+  updateBottomBarSpace();
+  new ResizeObserver(updateBottomBarSpace).observe(bottomBar);
+
   const throwBtn = document.querySelector('button[onclick="throwCurse()"]');
   const purgeBtn = document.querySelector('button[onclick="purge()"]');
 
@@ -2010,12 +2017,6 @@ function showConfirm(text, onYesFnName) {
     </script>
 <script>
   
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('service-worker.js')
-    .then(() => console.log('Service Worker registered'))
-    .catch(err => console.error('SW registration failed:', err));
-}
-
 // 1) Show the confirm dialog for removing a player
 function showRemoveConfirm(idx) {
   const box = document.getElementById('removeConfirmBox');
@@ -2061,9 +2062,18 @@ headerToggle.addEventListener('click', () => {
   headerToggle.setAttribute('aria-expanded', !isHidden);
 });
 
-if ('serviceWorker' in navigator) {
+if (
+  'serviceWorker' in navigator &&
+  (location.protocol === 'https:' ||
+    location.hostname === 'localhost' ||
+    location.hostname === '127.0.0.1' ||
+    location.hostname === '[::1]')
+) {
   navigator.serviceWorker.register('service-worker.js')
-    .then(() => console.log('Service Worker registered'));
+    .then(() => console.log('Service Worker registered'))
+    .catch(err => console.error('SW registration failed:', err));
+} else if ('serviceWorker' in navigator) {
+  console.info('Service Worker skipped: open this app over HTTPS or localhost to enable offline support.');
 }
 
 
