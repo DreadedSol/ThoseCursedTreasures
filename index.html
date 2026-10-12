@@ -141,6 +141,10 @@ body > * {
 
 .player-info {
   position: relative;
+  width: 100%;
+  max-width: 440px;
+  box-sizing: border-box;
+  justify-self: center;
   background-color: #fffaf3; /* base parchment-like tone */
   background-image:
     url('images/parchment-player2.png'),
@@ -371,17 +375,81 @@ body > * {
 
 
         .curse {
-            font-style: italic;
+            font-style: normal;
             margin-top: 10px;
-            background: #d4af37;
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
+            background: rgba(128, 0, 32, 0.08);
+            color: #4e342e;
+            padding: 14px;
+            border: 1px solid rgba(128, 0, 32, 0.24);
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(55, 38, 18, 0.16);
+            text-align: center;
         }
 
-        /* override to burgundy only on actually cursed cards */
+        .curse-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            text-align: center;
+        }
+
+        .curse-item-image,
+        .curse-item-icon {
+            display: block;
+            width: min(100%, 220px);
+            height: auto;
+            aspect-ratio: 1;
+            object-fit: contain;
+            border-radius: 6px;
+            background: #fffdf8;
+            box-shadow: 0 2px 8px rgba(55, 38, 18, 0.2);
+            border: 1px solid rgba(128, 0, 32, 0.22);
+        }
+
+        .curse-item-icon {
+            display: grid;
+            place-items: center;
+            font-size: 6rem;
+            line-height: 1;
+        }
+
+        .curse-item [hidden] {
+            display: none;
+        }
+
+        .curse-item-details {
+            min-width: 0;
+            width: 100%;
+            line-height: 1.45;
+            text-align: center;
+            padding: 10px;
+            color: #4e342e;
+            background: rgba(255, 250, 240, 0.97);
+            border: 1px solid #c8b88a;
+            border-radius: 8px;
+        }
+
         .player-info.cursed .curse {
             background: #800020;
+            border-color: #5c0017;
+            color: white;
+        }
+
+        .curse-item-title {
+            display: block;
+            width: 100%;
+            text-align: center;
+            font-style: normal;
+            color: #6a4e23;
+            font-size: 1.1rem;
+        }
+
+        .curse-item-details .cleanse-cost {
+            margin-top: 8px;
+            padding-top: 7px;
+            border-top: 1px solid #d8cba8;
+            font-weight: normal;
         }
 
         .token {
@@ -1033,6 +1101,8 @@ Devised to be played with the base game using the cave's variant. <br>
         let enablePurge      = true;
         let cleanseDifficulty = 'normal';
         let currentRound = 1;
+        let shrineState = 'waiting';
+        let shrineDistance = null;
 
 
 
@@ -1040,7 +1110,6 @@ Devised to be played with the base game using the cave's variant. <br>
         let treasureCount = 0;
         // shrine appears after between 2 and 12 treasures
         const shrineTriggerDraw = Math.floor(Math.random() * 11) + 2;
-        let shrinePlaced = false;
 
 window.addEventListener('DOMContentLoaded', () => {
   const bottomBar = document.getElementById('bottomBar');
@@ -1082,8 +1151,22 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 
+        function clonePlayerState(player) {
+            return {
+                ...player,
+                curse: player.curse ? { ...player.curse } : null,
+                purgeBenefits: [...player.purgeBenefits]
+            };
+        }
+
         function saveHistory() {
-            history.push(JSON.parse(JSON.stringify(players)));
+            history.push({
+                players: players.map(clonePlayerState),
+                currentRound,
+                treasureCount,
+                shrineState,
+                shrineDistance
+            });
         }
 
 function getRandomCurseCost() {
@@ -1099,19 +1182,6 @@ function getRandomCurseCost() {
   // normal
   return r < 0.4 ? 2 : (r < 0.8 ? 3 : 4);
 }
-
-
-        function placeShrine() {
-            shrinePlaced = true;
-            const player = players[selectedPlayerIndex];
-            displayShrine(player);
-        }
-
-        function displayShrine(player) {
-            showMessage(`A Shrine Appears! ${player.name} may cleanse for free.`);
-            applyShrineBenefit(player);
-        }
-
         // Toggle the visibility of the rules menu
         function toggleRulesMenu() {
             const rulesMenu = document.getElementById("rulesMenu");
@@ -1127,6 +1197,7 @@ const curses = [
   {
     name: "Heavy Idol",
     icon: "🗿",
+    image: "images/curses/heavy-idol.png",
     effect: "Each card only moves 1 space.",
     getBenefit: (cost) => {
       if (cost <= 2) return "Gain +2 movement action (one-time).";
@@ -1138,6 +1209,7 @@ const curses = [
   {
     name: "Greedy Gem",
     icon: "💎",
+    image: "images/curses/greedy-gem.png",
     effect: "Discard one extra card when buying.",
     getBenefit: (cost) => {
       if (cost <= 2) return "Gain 1 extra gold (for cards this turn or into your stash).";
@@ -1149,6 +1221,7 @@ const curses = [
   {
     name: "Banjaxed Compass",
     icon: "🧭",
+    image: "images/curses/banjaxed-compass.png",
     effect: "Cannot use yellow cards for movement.",
     getBenefit: (cost) => {
       if (cost <= 2) return "Draw 1 extra card next turn.";
@@ -1160,6 +1233,7 @@ const curses = [
   {
     name: "Pewter Shoes",
     icon: "🥾",
+    image: "images/curses/pewter-shoes.png",
     effect: "Must skip your first movement action each turn.",
     getBenefit: (cost) => {
       if (cost <= 2) return "Draw 1 card next turn.";
@@ -1171,6 +1245,7 @@ const curses = [
   {
     name: "Fly Agaric",
     icon: "🍄",
+    image: "images/curses/fly-agaric.png",
     effect: "Play your first card at random each turn.",
     getBenefit: (cost) => {
       if (cost <= 2) return "Draw a card.";
@@ -1182,6 +1257,7 @@ const curses = [
   {
     name: "Manuka Honey",
     icon: "🍯",
+    image: "images/curses/manuka-honey.png",
     effect: "Pay 1 extra coin per card purchase.",
     getBenefit: (cost) => {
       if (cost <= 2) return "Gain 2 extra gold.";
@@ -1193,6 +1269,7 @@ const curses = [
   {
     name: "Broken Machete",
     icon: "🔪",
+    image: "images/curses/broken-machete.png",
     effect: "Cannot use green cards for movement.",
     getBenefit: (cost) => {
       if (cost <= 2) return "Gain 3 machetes for this turn.";
@@ -1204,6 +1281,7 @@ const curses = [
   {
     name: "Mummified Leech",
     icon: "🌪️",
+    image: "images/curses/mummified-leech.png",
     effect: "Draw 1 fewer card each turn. Down to a minimum of 2 cards in hand.",
     getBenefit: (cost) => {
       if (cost <= 2) return "Draw 1 additional card next turn.";
@@ -1215,6 +1293,7 @@ const curses = [
 {
   name: "Jeering Monkey",
   icon: "🐒",
+  image: "images/curses/jeering-monkey.png",
   effect: "Player to your left picks card randomly from your hand to discard. You can choose to trash it instead.",
   getBenefit: (cost) => {
     if (cost <= 2) return "Gain 1 extra card next turn.";
@@ -1226,6 +1305,7 @@ const curses = [
 {
   name: "Map Fragment",
   icon: "🧾",
+  image: "images/curses/map-fragment.png",
   effect: "Cannot use purples cards.",
   getBenefit: (cost) => {
     if (cost <= 2) return "Draw 2 cards next turn.";
@@ -1237,6 +1317,7 @@ const curses = [
 {
   name: "Stone Toad",
   icon: "🐸",
+  image: "images/curses/stone-toad.png",
   effect: "You cannot use blue cards for movement.",
   getBenefit: (cost) => {
     if (cost <= 2) return "Gain 2 blue movement this turn.";
@@ -1248,6 +1329,7 @@ const curses = [
 {
   name: "Golden Flea",
   icon: "🐞",
+  image: "images/curses/golden-flea.png",
   effect: "You must draw 1 fewer card and play with your hand face up.",
   getBenefit: (cost) => {
     if (cost <= 2) return "Gain +1 stash gold and draw an extra card.";
@@ -1259,6 +1341,7 @@ const curses = [
 {
   name: "Possessed Coin",
   icon: "🪙",
+  image: "images/curses/possessed-coin.png",
   effect: "Your current stash is frozen and unusable.",
   getBenefit: (cost) => {
     if (cost <= 2) return "Gain 2 usable coins immediately.";
@@ -1312,6 +1395,12 @@ function drawTreasure() {
   // 2) …and bump the global draw counter for shrine logic.
   treasureCount++;
 
+  if (shrineState === 'waiting' && treasureCount === shrineTriggerDraw) {
+    shrineState = 'available';
+    shrineDistance = getShrineDistance();
+    renderShrineState();
+  }
+
   // 3) If they have Spirit Guide immunity, consume it and stop here:
   if (player.immunity) {
     player.immunity = false;
@@ -1329,28 +1418,24 @@ function drawTreasure() {
   const baseCurse = curses[Math.floor(Math.random() * curses.length)];
   player.curse = { ...baseCurse, cost: getRandomCurseCost() };
 
-  // 6) Shrine check now works even if immunity was used earlier:
-  if (!shrinePlaced && treasureCount === shrineTriggerDraw) {
-    showShrineBanner();
-  }
-
   updateDisplay();
 }
 
 
-        function drawTreasureWithoutShrineCheck() {
+        function drawTreasureWithoutShrineCheck(recordHistory = true) {
             if (selectedPlayerIndex === null) return showMessage("Please select a player.");
             const player = players[selectedPlayerIndex];
 
-              if (player.immunity) {
+            if (player.curse && !player.immunity) return;
+
+            if (recordHistory) saveHistory();
+
+            if (player.immunity) {
     player.immunity = false;
     showResult("🕊️ Your Spirit Guide protects you — you resist this curse!");
     updateDisplay();
     return;
   }
-            if (player.curse) return; // player can't have a curse already
-
-                saveHistory(); 
 
             const baseCurse = curses[Math.floor(Math.random() * curses.length)];
             const curse = {
@@ -1365,7 +1450,6 @@ function drawTreasure() {
         }
 
         function finishThrow(isSuccess, source, target) {
-           saveHistory();  
   // clear UI highlights/banner
   document.querySelectorAll('.player-info.highlight-target')
           .forEach(c => c.classList.remove('highlight-target'));
@@ -1394,21 +1478,6 @@ function drawTreasure() {
 
 
         // Function to display the shrine when the right turn comes
-        function displayShrine(player) {
-            showMessage(`A Shrine Appears! Player ${player.name}, you can now cleanse your curse for free!`);
-            // You can further customize this message and shrine logic as needed
-            // For example, the shrine can have a one-time benefit or be available for all players
-            applyShrineBenefit(player);
-        }
-
-function applyShrineBenefit(player) {
-  // compute and assign the same benefit
-  player.benefitMessage = player.curse.getBenefit(player.curse.cost);
-  player.curse = null;
-  updateDisplay();
-}
-
-
 function useRitual() {
   if (selectedPlayerIndex === null) {
     return showMessage("Please select a player.");
@@ -1422,9 +1491,10 @@ function useRitual() {
 
   // 2) Free‐purge upgrade?
   if (player.bonusCleansing) {
+    saveHistory();
     player.bonusCleansing = false;
     showMessage("🔮 Wizard's Friend activates! This ritual is upgraded to a FREE Purge!");
-    purge(true);
+    purge(true, false);
     return;
   }
 
@@ -1454,7 +1524,7 @@ function useRitual() {
 // ————————————————
 // 1) Update purge() to accept skipCost
 // ————————————————
-function purge(skipCost = false) {
+function purge(skipCost = false, recordHistory = true) {
   if (!enablePurge) return showMessage("Purge is currently disabled in settings.");
   if (selectedPlayerIndex === null) {
     showMessage("Please select a player.");
@@ -1466,7 +1536,6 @@ function purge(skipCost = false) {
     return;
   }
 
-  saveHistory();
   const cost = player.curse.cost * 2;
 
   // skipCost => ignore both the check AND the deduction
@@ -1474,6 +1543,8 @@ function purge(skipCost = false) {
     showMessage("Not enough gold for Purge!");
     return;
   }
+
+  if (recordHistory) saveHistory();
 
   // 1) Capture and apply the cleansing benefit:
   const cleanseMsg = typeof player.curse.getBenefit === "function"
@@ -1506,7 +1577,7 @@ function purge(skipCost = false) {
   }   if (perk.includes("immunity")) {
     player.immunity = true;
   } else if (perk.includes("Treasure Hunter's Instinct")) {
-    setTimeout(() => drawTreasureWithoutShrineCheck(), 0);
+    setTimeout(() => drawTreasureWithoutShrineCheck(false), 0);
   } else if (perk.includes("Wizard's Friend")) {
     player.bonusCleansing = true;
   }
@@ -1523,6 +1594,7 @@ function purge(skipCost = false) {
 
         // Apply cleansing benefit
 function applyCleansingBenefit(player) {
+    saveHistory();
     const benefitMessage = player.curse.getBenefit(player.curse.cost);
     player.benefitMessage = benefitMessage;
     updateDisplay();
@@ -1592,10 +1664,22 @@ function updateDisplay() {
       <div class="token">Treasures: ${player.treasures}</div>
       <div class="curse">
         ${player.curse ? `
-          <span class="curse-icon">${player.curse.icon}</span> 
-          <strong>${player.curse.name}:</strong> ${player.curse.effect}
-          <div class="cleanse-cost">
-            <strong>Cleanse Cost:</strong> ${player.curse.cost} gold
+          <div class="curse-item">
+            <img
+              class="curse-item-image"
+              src="${player.curse.image}"
+              alt=""
+              loading="lazy"
+              onerror="this.hidden=true; this.nextElementSibling.hidden=false"
+            >
+            <span class="curse-item-icon" aria-hidden="true" hidden>${player.curse.icon}</span>
+            <div class="curse-item-details">
+              <strong class="curse-item-title">${player.curse.name}</strong>
+              <div>${player.curse.effect}</div>
+              <div class="cleanse-cost">
+                <strong>Cleanse Cost:</strong> ${player.curse.cost} gold
+              </div>
+            </div>
           </div>
         ` : "No curse"}
       </div>
@@ -1643,11 +1727,10 @@ function updateDisplay() {
         // Change stash amount (Add or subtract gold)
         function changeStash(playerIndex, amount) {
             const player = players[playerIndex];
+            if (!player || player.stash + amount < 0) return;
             saveHistory();
-            if (player && player.stash + amount >= 0) {
-                player.stash += amount;
-                updateDisplay();
-            }
+            player.stash += amount;
+            updateDisplay();
         }
 
 function calculateScores() {
@@ -1803,36 +1886,35 @@ document.querySelectorAll('.player-info.highlight-target')
         // Clear benefit after cleansing
         function clearBenefit(index) {
             const player = players[index];
+            if (!player || !player.benefitMessage) return;
+            saveHistory();
             player.benefitMessage = '';
             updateDisplay();
         }
 
         function clearCleansingBenefit(index) {
-            saveHistory(); 
-            players[index].benefitMessage = '';
+            const player = players[index];
+            if (!player || !player.benefitMessage) return;
+            saveHistory();
+            player.benefitMessage = '';
             updateDisplay();
         }
 
         function clearPurgeBenefit(index) {
-            saveHistory(); 
-            players[index].purgeBenefitMessage = '';
+            const player = players[index];
+            if (!player || !player.purgeBenefitMessage) return;
+            saveHistory();
+            player.purgeBenefitMessage = '';
             updateDisplay();
         }
 
         function clearPurgePerk(playerIndex, perkIndex) {
-  players[playerIndex].purgeBenefits.splice(perkIndex, 1);
+  const player = players[playerIndex];
+  if (!player || perkIndex < 0 || perkIndex >= player.purgeBenefits.length) return;
+  saveHistory();
+  player.purgeBenefits.splice(perkIndex, 1);
   updateDisplay();
 }
-
-
-        // Save the current state of players to history
-        console.log(history); // Before and after saveHistory()
-
-        function saveHistory() {
-            const snapshot = JSON.parse(JSON.stringify(players)); // Create a deep copy of players
-            history.push(snapshot);
-        }
-        console.log(history); // Before and after saveHistory()
 
 
         function undo() {
@@ -1842,11 +1924,19 @@ document.querySelectorAll('.player-info.highlight-target')
                 return;
             }
 
-            // Pop the last saved state from history and revert players to that state
-            const lastState = history.pop();
-            players = JSON.parse(JSON.stringify(lastState)); // Deep copy to revert players
+            const previousState = history.pop();
+            players = previousState.players;
+            currentRound = previousState.currentRound;
+            treasureCount = previousState.treasureCount;
+            shrineState = previousState.shrineState;
+            shrineDistance = previousState.shrineDistance;
+            if (selectedPlayerIndex !== null && selectedPlayerIndex >= players.length) {
+                selectedPlayerIndex = null;
+            }
 
-            updateDisplay(); // Update the UI with the reverted state
+            updateRoundDisplay();
+            renderShrineState();
+            updateDisplay();
         }
 
         function getRandomTile() {
@@ -1881,42 +1971,42 @@ function getShrineDistance() {
   }
 }
 
-function showShrineBanner() {
-  const distance   = getShrineDistance();  
-  const playerName = players[selectedPlayerIndex]?.name || "the active player";
+function renderShrineState() {
   const wrap       = document.getElementById('shrineBannerContainer');
-
-  wrap.innerHTML = `
-    <div id="shrineBanner" class="shrine-banner">
-      ⛩️ <strong>Shrine Appears!</strong>
-      <span>It’s rumoured to be <em>${distance} hexes</em> away from ${playerName}!</span>
-      <button onclick="placeShrine()">Place the Shrine!</button>
-    </div>
-  `;
+  if (shrineState === 'available') {
+    const playerName = players[selectedPlayerIndex]?.name || "the active player";
+    wrap.innerHTML = `
+      <div id="shrineBanner" class="shrine-banner">
+        ⛩️ <strong>Shrine Appears!</strong>
+        <span>It’s rumoured to be <em>${shrineDistance} hexes</em> away from ${playerName}!</span>
+        <button onclick="placeShrine()">Place the Shrine!</button>
+      </div>
+    `;
+  } else if (shrineState === 'placed') {
+    wrap.innerHTML = `
+      <div id="shrineBanner" class="shrine-banner collapsed">
+        <button
+          id="shrineIconBtn"
+          onclick="useShrine()"
+          aria-label="Use Shrine"
+          style="color:black;background:none;border:none;font-size:1.5rem;cursor:pointer"
+        >⛩️ <strong>Use Shrine!</strong></button>
+      </div>
+    `;
+  } else {
+    wrap.innerHTML = '';
+  }
 }
+
 function placeShrine() {
-  const wrap = document.getElementById('shrineBannerContainer');
-  wrap.innerHTML = `
-    <div id="shrineBanner" class="shrine-banner collapsed">
-      <button
-        id="shrineIconBtn"
-        onclick="useShrine()"
-        aria-label="Use Shrine"
-        style="color:black;background:none;border:none;font-size:1.5rem;cursor:pointer"
-      >⛩️ <strong>Use Shrine!</strong></button>
-    </div>
-  `;
+  if (shrineState !== 'available') return;
+  saveHistory();
+  shrineState = 'placed';
+  renderShrineState();
 }
 
 
 
-
-
-        /** Removes the shrine banner from the DOM */
-        function dismissShrineBanner() {
-            const b = document.getElementById('shrineBanner');
-            if (b) b.remove();
-        }
 
 
 // When the shrine is placed and the active player clicks “Use Shrine”
@@ -1925,14 +2015,18 @@ function useShrine() {
     showMessage('Select a player first to use the shrine.');
     return;
   }
+  if (shrineState !== 'placed') return;
   const player = players[selectedPlayerIndex];
   if (!player.curse) {
+    saveHistory();
+    shrineState = 'used';
+    shrineDistance = null;
+    renderShrineState();
     showMessage('This player has no curse to remove.');
-    dismissShrineBanner();
     return;
   }
 
-  saveHistory(); // for undo
+  saveHistory();
 
   // 1) Compute the normal cleanse benefit from the curse
   const benefitMsg = player.curse.getBenefit(player.curse.cost);
@@ -1942,9 +2036,11 @@ function useShrine() {
 
   // 3) Store and display that benefit
   player.benefitMessage = benefitMsg;
+  shrineState = 'used';
+  shrineDistance = null;
 
   // 4) Clean up UI
-  dismissShrineBanner();
+  renderShrineState();
   updateDisplay();
 }
 
@@ -2007,12 +2103,14 @@ function updateRoundDisplay() {
 }
 
 function nextRound() {
+  saveHistory();
   currentRound++;
   updateRoundDisplay();
 }
 
 function prevRound() {
   if (currentRound > 1) {
+    saveHistory();
     currentRound--;
     updateRoundDisplay();
   }
@@ -2025,6 +2123,7 @@ function finishSelectedPlayer() {
   }
   const p = players[selectedPlayerIndex];
   if (p.finishRound == null) {
+    saveHistory();
     p.finishRound = currentRound;
     updateDisplay();
   }
@@ -2081,7 +2180,8 @@ function clearRemoveConfirm() {
 
 // 3) Actually remove the player and re-render
 function removePlayer(idx) {
-  saveHistory();           // for undo
+  if (idx < 0 || idx >= players.length) return;
+  saveHistory();
   players.splice(idx, 1);  // remove from array
   clearRemoveConfirm();
   updateDisplay();         // refresh UI
