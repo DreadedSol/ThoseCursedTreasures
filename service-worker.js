@@ -1,5 +1,5 @@
 // service-worker.js
-const CACHE_NAME = 'cursed-treasures-v1';
+const CACHE_NAME = 'cursed-treasures-v2';
 const ASSETS = [
   './',                   // the root of your app
   'index.html',
@@ -37,7 +37,7 @@ self.addEventListener('activate', evt => {
     caches.keys().then(keys =>
       Promise.all(
         keys
-          .filter(key => key !== CACHE_NAME)
+          .filter(key => key.startsWith('cursed-treasures-') && key !== CACHE_NAME)
           .map(oldKey => caches.delete(oldKey))
       )
     )

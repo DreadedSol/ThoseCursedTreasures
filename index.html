@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#b45f06">
 
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Those Cursed Treasures</title>
     <style>
         
@@ -707,7 +707,7 @@ body > * {
   position: fixed;
   bottom: 0;
   left: 0; right: 0;
-  padding: 8px;
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1002,8 +1002,9 @@ Devised to be played with the base game using the cave's variant. <br>
 
 window.addEventListener('DOMContentLoaded', () => {
   const bottomBar = document.getElementById('bottomBar');
+  const bottomBarSpacer = document.getElementById('bottomBarSpacer');
   const updateBottomBarSpace = () => {
-    document.body.style.paddingBottom = `${bottomBar.offsetHeight + 20}px`;
+    bottomBarSpacer.style.height = `${bottomBar.offsetHeight + 20}px`;
   };
   updateBottomBarSpace();
   new ResizeObserver(updateBottomBarSpace).observe(bottomBar);
@@ -2079,6 +2080,7 @@ if (
 
 </script>
 
+<div id="bottomBarSpacer" aria-hidden="true"></div>
 </body>
 
 </html>

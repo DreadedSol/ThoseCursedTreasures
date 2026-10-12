@@ -1,7 +1,8 @@
 {
 "name": "ThoseCursedTreasures",
 "short_name": "ThoseCursedTreasures",
-"start_url": "/",
+"start_url": "./",
+"scope": "./",
 "display": "standalone",
 "description": "BoardgameExpansion",
 "lang": "English",
