@@ -179,6 +179,62 @@ body > * {
   background: #e5f5d0;
 }
 
+#addPlayerForm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: min(calc(100% - 24px), 480px);
+  margin: 12px auto 24px;
+  padding: 12px;
+  box-sizing: border-box;
+  background-color: #fffaf3;
+  background-image: url('images/parchment-player2.png');
+  background-size: cover;
+  background-blend-mode: multiply;
+  border: 1px solid #8c7b5a;
+  border-radius: 8px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+#addPlayerForm[hidden] {
+  display: none;
+}
+
+#addPlayerForm label {
+  font-weight: bold;
+}
+
+#addPlayerName {
+  flex: 1 1 180px;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid #8c7b5a;
+  border-radius: 5px;
+  font: inherit;
+}
+
+#addPlayerName:focus-visible {
+  outline: 3px solid #ff9800;
+  outline-offset: 2px;
+}
+
+#addPlayerForm button {
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 5px;
+  color: white;
+  background: #3b531a;
+  font: inherit;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#addPlayerForm button:hover {
+  background: #4e7331;
+}
+
 .player-info::before {
   content: "";
   position: absolute;
@@ -1269,6 +1325,18 @@ Devised to be played with the base game using the cave's variant. <br>
       aria-label="Add player"
       title="Add player"
     >+</button>
+    <form id="addPlayerForm" onsubmit="submitAddPlayer(event)" hidden>
+      <label for="addPlayerName">Player name</label>
+      <input
+        id="addPlayerName"
+        name="playerName"
+        type="text"
+        autocomplete="off"
+        required
+      >
+      <button id="submitAddPlayerButton" type="submit">Add</button>
+      <button id="cancelAddPlayerButton" type="button" onclick="cancelAddPlayer()">Cancel</button>
+    </form>
 
 
     <script>
@@ -1322,6 +1390,9 @@ window.addEventListener('DOMContentLoaded', () => {
       enablePurge = e.target.checked;
       updateDisplay();
     });
+
+  document.getElementById('addPlayerName')
+    .addEventListener('input', e => e.target.setCustomValidity(''));
 });
 
 
@@ -1529,10 +1600,28 @@ const curses = [
 
         // Add player to the game
         function addPlayer() {
-            const name = prompt("Enter player name:");
-            if (!name) return;
+            const form = document.getElementById('addPlayerForm');
+            const input = document.getElementById('addPlayerName');
+            form.hidden = false;
+            requestAnimationFrame(() => {
+                form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                input.focus({ preventScroll: true });
+            });
+        }
 
-            saveHistory(); // Save the state before adding the player
+        function submitAddPlayer(event) {
+            event.preventDefault();
+            const form = document.getElementById('addPlayerForm');
+            const input = document.getElementById('addPlayerName');
+            const name = input.value.trim();
+            if (!name) {
+                input.setCustomValidity('Enter a player name.');
+                input.reportValidity();
+                return;
+            }
+
+            input.setCustomValidity('');
+            saveHistory();
             players.push({
                 name,
                 curse: null,
@@ -1549,7 +1638,15 @@ const curses = [
                 finishRound: null   
             });
 
+            form.reset();
+            form.hidden = true;
             updateDisplay();
+        }
+
+        function cancelAddPlayer() {
+            const form = document.getElementById('addPlayerForm');
+            form.reset();
+            form.hidden = true;
         }
 
 
