@@ -262,32 +262,7 @@ body > * {
 
 
 .player-info.selected {
-  border: 2px solid #ff9800;
-  position: relative; 
-  /* keep your normal parchment bg */
-  background-image:
-    url('images/parchment-player2.png'),
-    linear-gradient(#fffaf3, #fffaf3);
-  background-size: cover;
-  background-blend-mode: multiply;
-  position: relative;     /* for the pseudo‐element */
-}
-
-.player-info.selected::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: #ffeb3b;            /* full-strength yellow */
-  mix-blend-mode: multiply;       /* deeper, richer tint */
-  opacity: 0.8;                   /* tweak between 0.6–1.0 until it’s bright enough */
-  pointer-events: none;
-  border-radius: inherit;
-  z-index: 1;
-}
-
-.player-info.selected > * {
-  position: relative;
-  z-index: 2;
+  border: 6px solid #ffeb3b;
 }
 
 .player-info.cursed {
@@ -295,7 +270,7 @@ body > * {
 }
 
 .player-info.cursed.selected {
-  border-color: #ff9800;
+  border-color: #ffeb3b;
   outline: 2px solid #800020;
   outline-offset: 1px;
 }
@@ -1924,6 +1899,10 @@ function throwCurse(playerIndex = selectedPlayerIndex) {
 }
 
 
+function getThrowCost(curseCost) {
+  return Math.ceil(Number(curseCost) / 2);
+}
+
 
 
         // Update the display for player information
@@ -1985,12 +1964,12 @@ function updateDisplay() {
                 ` : ""}
                 ${enableThrow &&
                     players.some((otherPlayer, otherIndex) => otherIndex !== index && !otherPlayer.curse) &&
-                    player.stash >= Math.ceil(player.curse.cost / 2) ? `
+                    Number(player.stash) >= getThrowCost(player.curse.cost) ? `
                   <button
                     class="cleanse-cost-button throw-cost-button"
                     onclick="throwCurse(${index})"
                   >
-                    Throw (${Math.ceil(player.curse.cost / 2)})
+                    Throw (${getThrowCost(player.curse.cost)})
                   </button>
                 ` : ""}
               </div>
@@ -2097,7 +2076,7 @@ function selectPlayer(index) {
     const source = players[throwSourceIndex];
     const target = players[index];
     const halfCost = source && source.curse
-      ? Math.ceil(source.curse.cost / 2)
+      ? getThrowCost(source.curse.cost)
       : 0;
 
     // 1) Clicking yourself
