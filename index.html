@@ -362,6 +362,18 @@ body > * {
   border-radius: 4px;
 }
 
+.result-box.throw-success {
+  background: #e5f3e5;
+  border-left-color: #388e3c;
+  color: #245b28;
+}
+
+.result-box.throw-backfire {
+  background: #fbe7e7;
+  border-left-color: #c62828;
+  color: #7f1d1d;
+}
+
 .result-box button.clear-result {
   position: absolute;
   top: 6px;
@@ -1591,7 +1603,8 @@ function drawTreasure() {
   showResult(
     isSuccess
       ? `<strong>Success!</strong> Curse thrown to ${target.name}!`
-      : `<strong>Backfire!</strong> You keep the curse and ${source.curse.name} cleanse cost doubles to ${source.curse.cost} gold.`
+      : `<strong>Backfire!</strong> You keep the curse and ${source.curse.name} cleanse cost doubles to ${source.curse.cost} gold.`,
+    isSuccess ? 'throw-success' : 'throw-backfire'
   );
 
   // end throw‐mode and refresh
@@ -1980,20 +1993,11 @@ function selectPlayer(index) {
           delay += 30;
           setTimeout(spinRoulette, delay);
         } else {
-          // ————— Stop spinner —————
-          document.body.removeChild(banner);
-finishThrow(isSuccess, source, target);
-
-// Remove highlights / banner
-document.querySelectorAll('.player-info.highlight-target')
-        .forEach(c => c.classList.remove('highlight-target'));
-if (document.getElementById("throwBanner")) 
-  document.getElementById("throwBanner").remove();
-
-// End throw mode & refresh
-throwMode = false;
-updateDisplay();
-
+          banner.textContent = isSuccess ? 'THROW!' : 'BACKFIRE!';
+          setTimeout(() => {
+            banner.remove();
+            finishThrow(isSuccess, source, target);
+          }, 650);
         }
       }
 
@@ -2210,8 +2214,10 @@ function showConfirm(text, onYes) {
 }
 
 /** “Result” banner (like Throw Curse) */
-function showResult(html) {
+function showResult(html, outcomeClass = '') {
   const box = document.getElementById('resultBox');
+  box.classList.remove('throw-success', 'throw-backfire');
+  if (outcomeClass) box.classList.add(outcomeClass);
   box.innerHTML = `
     <button class="clear-result" onclick="hideResult()">×</button>
     ${html}
@@ -2221,6 +2227,7 @@ function showResult(html) {
 function hideResult() {
   const box = document.getElementById('resultBox');
   box.style.display = 'none';
+  box.classList.remove('throw-success', 'throw-backfire');
   box.innerHTML = '';
 }
 
