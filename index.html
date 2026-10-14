@@ -81,14 +81,6 @@ body > * {
 }
 
 
-#settingsToggle {
-  background: none;
-  border: none;
-  font-size: 1.2rem;
-  cursor: pointer;
-  color: #6a4e23;
-}
-
 .settings.collapsed {
   display: none;
 }
@@ -1217,60 +1209,47 @@ body > * {
 }
 
 #bottomBar .settings-container.settings-collapsed {
-  flex: 1 1 100%;
-  width: 100%;
-  max-width: 560px;
-  min-width: 0;
-  padding: 0;
-  background: transparent;
-  border: 0;
-  box-shadow: none;
-  align-self: center;
+  display: none;
 }
 
 #bottomBar .settings-container:not(.settings-collapsed) {
-  flex-wrap: wrap;
-}
-
-#bottomBar .settings-container:not(.settings-collapsed) .settings {
-  flex: 1 1 100%;
-  width: 100%;
+  position: absolute;
+  right: 8px;
+  bottom: calc(100% + 8px);
+  z-index: 1;
+  display: block;
+  box-sizing: border-box;
+  width: min(360px, calc(100vw - 24px));
+  max-width: calc(100vw - 24px);
+  padding: 8px;
+  border: 1px solid rgba(140, 123, 90, 0.7);
+  border-radius: 10px;
+  background: rgba(255, 250, 240, 0.96);
+  box-shadow: 0 3px 12px rgba(55, 38, 18, 0.22);
 }
 
 #bottomBar .settings {
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: 100%;
+  box-sizing: border-box;
+  justify-content: stretch;
+  align-items: center;
+  column-gap: 0.75rem;
+  row-gap: 0.4rem;
   margin: 0;
 }
 
-@container (min-width: 500px) {
-  #bottomBar .settings {
-    display: grid;
-    grid-template-columns: max-content max-content;
-    justify-content: center;
-    align-items: center;
-    column-gap: 1.25rem;
-    row-gap: 0.4rem;
-  }
+#bottomBar .settings label {
+  min-width: 0;
 }
 
-@container (min-width: 700px) {
-  #bottomBar .settings {
-    grid-template-columns: repeat(4, max-content);
-    column-gap: 1rem;
-  }
+#bottomBar .settings select {
+  max-width: 100%;
 }
 
 #bottomBar .settings.collapsed {
   display: none;
-}
-
-#bottomBar button#settingsToggle {
-  width: auto;
-  margin: 0;
-  padding: 4px 8px;
-  background: transparent;
-  color: #6a4e23;
-  font-size: 1.1rem;
 }
 
 #bottomBar .bottom-bar-more[hidden],
@@ -1326,6 +1305,16 @@ body > * {
 
 #bottomBar .bottom-bar-toggle {
   background-color: #8c7b5a;
+}
+
+#bottomBar .settings-toggle,
+#bottomBar .settings-toggle:hover {
+  background-color: #8c7b5a;
+}
+
+#bottomBar .settings-toggle[aria-expanded="true"],
+#bottomBar .settings-toggle[aria-expanded="true"]:hover {
+  background-color: #b5a27b;
 }
 
 #roundDisplay {
@@ -1444,29 +1433,39 @@ body > * {
 }
 
 #bottomBar.is-expanded {
-  bottom: 0;
-  left: 0;
-  right: 0;
-  width: auto;
-  max-width: none;
-  padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
-  transform: none;
-  border: 0;
-  border-top: 2px solid #8c7b5a;
-  border-radius: 0;
-  background-color: rgba(207, 175, 127, 0.6);
-  background-image: url('images/parchment-player2.png');
-  box-shadow: none;
-  backdrop-filter: none;
+  bottom: calc(8px + env(safe-area-inset-bottom));
+  left: 50%;
+  right: auto;
+  width: max-content;
+  max-width: calc(100% - 12px);
+  padding: 5px 8px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(140, 123, 90, 0.7);
+  border-radius: 14px;
+  background-color: rgba(255, 250, 240, 0.88);
+  background-image: none;
+  box-shadow: 0 3px 12px rgba(55, 38, 18, 0.22);
+  backdrop-filter: blur(8px);
 }
 
 #bottomBar.is-expanded .bottom-bar-content {
-  width: min(100%, 760px);
+  width: auto;
 }
 
 #bottomBar.is-expanded .bottom-bar-primary {
   flex-wrap: wrap;
-  width: 100%;
+  width: auto;
+}
+
+#bottomBar.is-expanded .bottom-bar-more {
+  width: auto;
+  max-width: 100%;
+}
+
+@media screen and (max-width: 480px) {
+  #bottomBar.is-expanded {
+    max-width: calc(100% - 8px);
+  }
 }
     </style>
 </head>
@@ -1504,8 +1503,15 @@ body > * {
       <button class="btn-small" onclick="finishSelectedPlayer()">Player Finished</button>
       <button class="btn-small" onclick="confirmCalculateScores()">End Game/Scores</button>
       <button class="btn-water" onclick="toggleRulesMenu()">Rules</button>
+      <button
+        class="btn-water settings-toggle"
+        id="settingsToggle"
+        aria-label="Settings"
+        title="Settings"
+        aria-expanded="false"
+        aria-controls="gameSettings"
+      >⚙️</button>
       <div class="settings-container settings-collapsed">
-        <button id="settingsToggle" aria-expanded="false" aria-controls="gameSettings">⚙️ Settings</button>
         <div class="settings collapsed" id="gameSettings">
           <label>
             Cleanse Cost:
@@ -1752,7 +1758,7 @@ window.addEventListener('DOMContentLoaded', () => {
   });
   window.addEventListener('resize', scheduleAutoCurseLayoutCheck);
   new MutationObserver(scheduleAutoCurseLayoutCheck)
-    .observe(playersContainer, { childList: true, subtree: true });
+    .observe(playersContainer, { childList: true });
 
   // When the dropdown changes
   document.getElementById('cleanseDifficulty')
@@ -1820,8 +1826,10 @@ function getRandomCurseCost() {
         // Toggle the visibility of the rules menu
         function toggleRulesMenu() {
             const rulesMenu = document.getElementById("rulesMenu");
-            if (rulesMenu.style.display === "none" || rulesMenu.style.display === "") {
+            const isOpening = rulesMenu.style.display === "none" || rulesMenu.style.display === "";
+            if (isOpening) {
                 rulesMenu.style.display = "block"; // Show the menu
+                window.scrollTo({ top: 0, behavior: "smooth" });
             } else {
                 rulesMenu.style.display = "none"; // Hide the menu
             }
@@ -2355,15 +2363,60 @@ function updateAutoCurseCardLayouts() {
     const details = card.querySelector('.curse-item-details');
     if (!image || !details) return;
 
+    const actions = details.querySelector('.cleanse-cost');
+    const currentActions = actions ? [...actions.childNodes] : [];
     card.classList.add('curse-layout-measuring');
-    const requiredHeight = details.getBoundingClientRect().height;
-    const availableHeight = image.getBoundingClientRect().height;
-    card.classList.remove('curse-layout-measuring');
+    let requiredHeight;
+    let availableHeight;
+
+    try {
+      if (actions) {
+        const player = players[Number(card.dataset.playerIndex)];
+        const cleanseButton = actions.querySelector('.cleanse-cost-button');
+        const projectedActions = [];
+
+        if (cleanseButton) {
+          const projectedCleanse = cleanseButton.cloneNode(true);
+          projectedCleanse.disabled = true;
+          projectedCleanse.removeAttribute('onclick');
+          projectedActions.push(projectedCleanse);
+        }
+        if (enablePurge) {
+          projectedActions.push(createProjectedAction(
+            'cleanse-cost-button purge-cost-button',
+            `Purge (${player.curse.cost * 2})`
+          ));
+        }
+        if (enableThrow) {
+          projectedActions.push(createProjectedAction(
+            'cleanse-cost-button throw-cost-button',
+            `Throw (${getThrowCost(player.curse.cost)})`
+          ));
+        }
+
+        actions.replaceChildren(...projectedActions);
+      }
+
+      requiredHeight = details.getBoundingClientRect().height;
+      availableHeight = image.getBoundingClientRect().height;
+    } finally {
+      if (actions) actions.replaceChildren(...currentActions);
+      card.classList.remove('curse-layout-measuring');
+    }
 
     if (requiredHeight > availableHeight + 1) {
       card.classList.add('curse-content-overflow');
     }
   });
+}
+
+function createProjectedAction(className, label) {
+  const button = document.createElement('button');
+  button.className = className;
+  button.textContent = label;
+  button.disabled = true;
+  button.setAttribute('aria-hidden', 'true');
+  return button;
 }
 
 
@@ -2376,6 +2429,7 @@ function updateDisplay() {
   players.forEach((player, index) => {
     const playerDiv = document.createElement("div");
     playerDiv.className = "player-info";
+    playerDiv.dataset.playerIndex = index;
     if (index === selectedPlayerIndex) {
       playerDiv.classList.add("selected");
     }
@@ -2417,9 +2471,6 @@ function updateDisplay() {
                   ${player.bonusCleansing && enablePurge
                     ? `Purge Upgrade (cleanse ${player.curse.cost})`
                     : `Cleanse (${player.curse.cost})`}
-                </button>
-                <button class="cleanse-cost-button draw-treasure-button" disabled>
-                  Draw Treasure
                 </button>
                 ${enablePurge && player.stash >= player.curse.cost * 2 ? `
                   <button
@@ -2807,6 +2858,7 @@ function useShrine() {
   // 4) Clean up UI
   renderShrineState();
   updateDisplay();
+  showResult('<strong>Shrine used!</strong><p>The curse was cleansed for free, and the cleansing benefit was granted.</p>');
 }
 
         function clearThrowResult() {
@@ -2993,7 +3045,7 @@ const settingsPanel  = document.querySelector('.settings');
 
 settingsToggle.addEventListener('click', () => {
   const isHidden = settingsPanel.classList.toggle('collapsed');
-  settingsToggle.closest('.settings-container').classList.toggle('settings-collapsed', isHidden);
+  settingsPanel.parentElement.classList.toggle('settings-collapsed', isHidden);
   settingsToggle.setAttribute('aria-expanded', !isHidden);
 });
 
