@@ -2586,6 +2586,21 @@ function consumeCurseImmunity(player) {
   player.spiritGuideActive = false;
 }
 
+function consumeWizardFriend(playerIndex) {
+  const player = players[playerIndex];
+  const perkIndex = player.purgeBenefits.findIndex(perk => perk.includes("Wizard's Friend"));
+  if (perkIndex !== -1) {
+    player.purgeBenefits.splice(perkIndex, 1);
+  }
+
+  const playerCard = document.querySelector(
+    `.player-info[data-player-index="${playerIndex}"]`
+  );
+  const perkElement = [...(playerCard?.querySelectorAll('.purge-benefit') ?? [])]
+    .find(element => element.textContent.includes("Wizard's Friend"));
+  perkElement?.remove();
+}
+
 function drawTreasure(playerIndex) {
   const player = players[playerIndex];
   if (!player) {
@@ -2774,9 +2789,10 @@ async function useRitual(playerIndex = selectedPlayerIndex) {
   if (player.bonusCleansing && enablePurge) {
     player.stash = stash - cost;
     player.bonusCleansing = false;
+    consumeWizardFriend(playerIndex);
     updatePlayerStashDisplay(playerIndex);
     showMessage("🔮 Wizard's Friend upgrades this ritual to a Purge! The normal cleanse cost was paid.");
-    purge(true, false, playerIndex);
+    await purge(true, false, playerIndex, "Wizard's Friend");
     return;
   }
 
@@ -2791,6 +2807,9 @@ async function useRitual(playerIndex = selectedPlayerIndex) {
   // A regular cleanse consumes Wizard's Friend if Purge is disabled.
   const consumedWizardFriend = player.bonusCleansing;
   player.bonusCleansing = false;
+  if (consumedWizardFriend) {
+    consumeWizardFriend(playerIndex);
+  }
 
   await animateCurseRemoval(playerIndex);
 
@@ -2807,7 +2826,7 @@ async function useRitual(playerIndex = selectedPlayerIndex) {
 // ————————————————
 // 1) Update purge() to accept skipCost
 // ————————————————
-async function purge(skipCost = false, recordHistory = true, playerIndex = selectedPlayerIndex) {
+async function purge(skipCost = false, recordHistory = true, playerIndex = selectedPlayerIndex, excludedPerk = null) {
   if (!enablePurge) return showMessage("Purge is currently disabled in settings.");
   if (playerIndex === null || !players[playerIndex]) {
     showMessage("Please select a player.");
@@ -2855,7 +2874,10 @@ async function purge(skipCost = false, recordHistory = true, playerIndex = selec
     "👀 <strong>Keen Eyes:</strong> <i>Throw Curse</i> accuracy increased up to a 75% hitrate. <strong>KEEP.</strong>",
     "🤠 <strong>Bully:</strong> Can move through other players pawns <strong>twice.</strong>"
   ];
-  const perk = purgeBenefits[Math.floor(Math.random() * purgeBenefits.length)];
+  const availablePerks = excludedPerk
+    ? purgeBenefits.filter(benefit => !benefit.includes(excludedPerk))
+    : purgeBenefits;
+  const perk = availablePerks[Math.floor(Math.random() * availablePerks.length)];
   player.purgeBenefits.push(perk);
 
   // 4) Apply any immediate game-state effects from the perk:
