@@ -513,7 +513,7 @@ body > * {
 
         #playersContainer.curse-layout-horizontal .player-info.cursed .curse-item {
             display: grid;
-            grid-template-columns: minmax(96px, 42%) minmax(0, 1fr);
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             align-items: center;
             justify-items: center;
             text-align: center;
@@ -521,11 +521,21 @@ body > * {
 
         #playersContainer.curse-layout-horizontal .player-info.cursed .curse-item-image,
         #playersContainer.curse-layout-horizontal .player-info.cursed .curse-item-icon {
-            width: min(100%, 180px);
+            box-sizing: border-box;
+            width: min(100%, 220px);
             justify-self: center;
         }
 
-        #playersContainer.curse-layout-horizontal .player-info.cursed .curse-item-details,
+        #playersContainer.curse-layout-horizontal .player-info.cursed .curse-item-details {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            width: min(100%, 220px);
+            aspect-ratio: 1;
+            min-height: 0;
+            overflow-y: auto;
+        }
+
         #playersContainer.curse-layout-horizontal .player-info.cursed .curse-item-title {
             text-align: center;
         }
