@@ -826,21 +826,61 @@ body > * {
         }
 
         .stash-amount {
+            position: relative;
+            isolation: isolate;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 1px;
-            min-width: 58px;
-            padding: 4px 10px 5px;
+            width: 68px;
+            height: 48px;
+            box-sizing: border-box;
+            padding: 3px;
             border: 1px solid #a66b12;
             border-radius: 5px;
-            background:
-                radial-gradient(ellipse at 35% 20%, rgba(255, 240, 174, 0.85), transparent 60%),
-                linear-gradient(145deg, #e8bd55, #d59b2b 58%, #bd811d);
+            background: #d9cba8;
             color: #593b0b;
             font-variant-numeric: tabular-nums;
-            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.65), inset 0 -2px 3px rgba(75, 55, 30, 0.14);
+            box-shadow: inset 0 1px 3px rgba(75, 55, 30, 0.28), 0 1px 2px rgba(70, 48, 20, 0.12);
+        }
+
+        .stash-meter {
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .stash-meter-fill {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            height: var(--stash-tier-fill, 0%);
+            transition: height 0.18s ease-out;
+        }
+
+        .stash-meter-fill-gold {
+            background: linear-gradient(145deg, #ffe28a, #e9ad32 58%, #bf7916);
+        }
+
+        .stash-meter-fill-rich-gold {
+            background: linear-gradient(145deg, #edbd50, #c78316 58%, #89500b);
+        }
+
+        .stash-readout {
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1px;
+            min-width: 37px;
+            padding: 2px 4px;
+            border-radius: 3px;
+            background: rgba(255, 250, 240, 0.82);
+            box-shadow: 0 1px 2px rgba(70, 48, 20, 0.16);
         }
 
         .stash-amount strong {
@@ -848,11 +888,17 @@ body > * {
             line-height: 1;
         }
 
-        .stash-amount span {
+        .stash-readout > span {
             font-size: 0.58rem;
             font-weight: bold;
             letter-spacing: 0.1em;
             text-transform: uppercase;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .stash-meter-fill {
+                transition: none;
+            }
         }
 
 #shrineBannerContainer {
@@ -2461,6 +2507,14 @@ function formatPlayerName(player) {
   `;
 }
 
+function updateStashMeter(stashAmount, stash) {
+  const amount = Math.max(0, Number(stash));
+  const goldFill = stashAmount.querySelector('.stash-meter-fill-gold');
+  const richGoldFill = stashAmount.querySelector('.stash-meter-fill-rich-gold');
+  goldFill.style.setProperty('--stash-tier-fill', `${Math.min(amount, 10) * 10}%`);
+  richGoldFill.style.setProperty('--stash-tier-fill', `${Math.min(Math.max(amount - 10, 0), 10) * 10}%`);
+}
+
 function renderCurseActions(player, index) {
   return `
     <button
@@ -2561,8 +2615,14 @@ function updateDisplay() {
           ${player.stash === 0 ? "disabled" : ""}
         >−</button>
         <span class="stash-amount" aria-label="Stash: ${player.stash}">
-          <strong>${player.stash}</strong>
-          <span>Stash</span>
+          <span class="stash-meter" aria-hidden="true">
+            <span class="stash-meter-fill stash-meter-fill-gold"></span>
+            <span class="stash-meter-fill stash-meter-fill-rich-gold"></span>
+          </span>
+          <span class="stash-readout">
+            <strong>${player.stash}</strong>
+            <span>Stash</span>
+          </span>
         </span>
         <button
           type="button"
@@ -2602,6 +2662,8 @@ function updateDisplay() {
 
     `;
 
+    updateStashMeter(playerDiv.querySelector('.stash-amount'), player.stash);
+
     playerDiv.addEventListener("click", event => {
       if (event.target instanceof Element &&
           event.target.closest("button, input, select, textarea, a, [role='button']")) {
@@ -2637,6 +2699,7 @@ function updatePlayerStashDisplay(playerIndex) {
 
   stashValue.textContent = player.stash;
   stashAmount.setAttribute('aria-label', `Stash: ${player.stash}`);
+  updateStashMeter(stashAmount, player.stash);
   removeButton.disabled = player.stash === 0;
 
   if (player.curse) {
