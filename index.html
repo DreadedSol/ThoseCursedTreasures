@@ -2655,7 +2655,7 @@ function useShrine() {
           const box = document.getElementById('resultBox');
           if (!box || box.style.display === 'none') return;
 
-          const shrineBanner = document.querySelector('#shrineBannerContainer .shrine-banner');
+          const shrineBanner = document.querySelector('#shrineBannerContainer .shrine-banner:not(.collapsed)');
           if (shrineBanner) {
             const top = shrineBanner.getBoundingClientRect().bottom + 8;
             box.style.top = `${top}px`;
