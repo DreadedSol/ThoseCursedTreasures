@@ -536,6 +536,26 @@ body > * {
             overflow-y: auto;
         }
 
+        #playersContainer.curse-layout-horizontal .player-info.cursed.curse-layout-measuring .curse-item-details {
+            height: auto;
+            aspect-ratio: auto;
+            overflow: visible;
+        }
+
+        #playersContainer.curse-layout-auto.curse-layout-horizontal .player-info.cursed.curse-content-overflow .curse-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #playersContainer.curse-layout-auto.curse-layout-horizontal .player-info.cursed.curse-content-overflow .curse-item-details {
+            width: min(100%, 300px);
+            height: auto;
+            aspect-ratio: auto;
+            min-height: auto;
+            overflow: visible;
+            align-self: center;
+        }
+
         #playersContainer.curse-layout-horizontal .player-info.cursed .curse-item-title {
             text-align: center;
         }
@@ -851,7 +871,7 @@ body > * {
 .rules-menu {
   display: none;
   box-sizing: border-box;
-  max-width: 960px;
+  max-width: 860px;
   width: calc(100% - 32px);
   margin: 20px auto;
   padding: clamp(16px, 3vw, 30px);
@@ -871,7 +891,7 @@ body > * {
 @media (max-width: 600px) {
   .rules-menu {
     width: calc(100% - 20px);
-    padding: 16px;
+    padding: 12px;
     margin: 10px auto;
     font-size: 0.95rem;
   }
@@ -946,7 +966,7 @@ body > * {
 
 .rules-layout {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
   margin-top: 18px;
   align-items: start;
@@ -961,7 +981,7 @@ body > * {
 }
 
 .rules-group-endgame {
-  grid-column: 1 / -1;
+  grid-column: 1;
 }
 
 .rules-group > h2 {
@@ -1033,7 +1053,7 @@ body > * {
   }
 
   .rules-group {
-    padding: 15px;
+    padding: 10px;
   }
 
   .rules-menu-header {
@@ -1081,18 +1101,36 @@ body > * {
   align-items: center;
   justify-content: center;
   position: relative;
-  margin-bottom: 1rem;
-  /* no background/padding here any more */
+  max-width: 1120px;
+  margin: 0 auto 1rem;
 }
 
 .header-content {
-  display: inline-block;  /* shrink to fit its children */
-  background: rgba(255, 255, 255, 0.4);
-  padding: 1rem 1.5rem;
-  border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-  transition: all 0.2s ease;
-  /* remove any width:100% or max-width if you had it here */
+  box-sizing: border-box;
+  width: 100%;
+  padding: 1.25rem clamp(1rem, 4vw, 3rem);
+  padding-right: clamp(3.5rem, 7vw, 5rem);
+  background:
+    linear-gradient(rgba(255, 250, 240, 0.78), rgba(255, 250, 240, 0.78)),
+    url('images/parchment-player2.png') center/cover;
+  border: 1px solid rgba(140, 123, 90, 0.48);
+  border-radius: 12px;
+  box-shadow: 0 5px 16px rgba(55, 38, 18, 0.16);
+  text-align: center;
+  transition: padding 0.2s ease, opacity 0.2s ease;
+}
+
+.header-content h1 {
+  margin: 0.2rem 0 0.8rem;
+  font-size: clamp(1.8rem, 5vw, 2.5rem);
+  line-height: 1.12;
+  text-wrap: balance;
+}
+
+.header-content p {
+  max-width: 860px;
+  margin: 0 auto;
+  line-height: 1.5;
 }
 
 
@@ -1102,12 +1140,50 @@ body > * {
 
 #headerToggle {
   position: absolute;
-  left: 1rem;
-  background: none;
-  border: none;
-  font-size: 1.2rem;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: rgba(255, 250, 240, 0.9);
+  border: 1px solid rgba(140, 123, 90, 0.5);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(55, 38, 18, 0.14);
+  font-size: 0.75rem;
+  line-height: 1;
   cursor: pointer;
   color: #6a4e23;
+}
+
+.header-container.is-collapsed {
+  height: 0;
+  margin: 0;
+}
+
+.header-container.is-collapsed #headerToggle {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .header-content {
+    padding: 1rem;
+    padding-right: 3.5rem;
+    border-radius: 10px;
+  }
+
+  .header-content h1 {
+    margin-bottom: 0.65rem;
+  }
+
+  #headerToggle {
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+  }
 }
 
 #bottomBar {
@@ -1425,9 +1501,10 @@ Devised to be played with the base game using the cave's variant. <br>
             </select>
           </label>
           <label>
-            Curse card layout:
+            Card Layout:
             <select id="curseLayout">
-              <option value="horizontal" selected>Horizontal</option>
+              <option value="auto" selected>Auto</option>
+              <option value="horizontal">Horizontal</option>
               <option value="vertical">Vertical</option>
             </select>
           </label>
@@ -1511,14 +1588,6 @@ Devised to be played with the base game using the cave's variant. <br>
           <h2>✨ Advanced Actions</h2>
 
           <section class="rules-topic">
-            <h3>📈 Scalable Cleanse Benefits</h3>
-            <ul>
-              <li>Curses offer <strong>greater rewards</strong> based on their cleanse cost.</li>
-              <li>A higher cleanse cost means a <strong>greater benefit</strong> when the curse is removed. This still applies if a failed Throw Curse action doubles the cost (for example, a cost of 8 or more gives especially powerful benefits).</li>
-            </ul>
-          </section>
-
-          <section class="rules-topic">
             <h3>💥 Purge</h3>
             <p>You may choose to <strong>double the cleanse cost</strong> of your curse to perform a Purge.</p>
             <p>Purge removes your curse and grants both:</p>
@@ -1553,6 +1622,14 @@ Devised to be played with the base game using the cave's variant. <br>
           <section class="rules-topic">
             <h3>🔥 Pro Tip</h3>
             <p>Curses sting—but their cleansing perks can flip the game. Spend smart, cleanse wisely, and take bold risks!</p>
+          </section>
+
+          <section class="rules-topic">
+            <h3>📈 Scalable Cleanse Benefits</h3>
+            <ul>
+              <li>Curses offer <strong>greater rewards</strong> based on their cleanse cost.</li>
+              <li>A higher cleanse cost means a <strong>greater benefit</strong> when the curse is removed. This still applies if a failed Throw Curse action doubles the cost (for example, a cost of 8 or more gives especially powerful benefits).</li>
+            </ul>
           </section>
         </section>
 
@@ -1642,11 +1719,25 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const curseLayout = document.getElementById('curseLayout');
   const playersContainer = document.getElementById('playersContainer');
+  const mobileCurseLayout = window.matchMedia('(max-width: 600px)');
   const updateCurseLayout = () => {
-    playersContainer.classList.toggle('curse-layout-horizontal', curseLayout.value === 'horizontal');
+    const automatic = curseLayout.value === 'auto';
+    const orientation = automatic
+      ? (mobileCurseLayout.matches ? 'vertical' : 'horizontal')
+      : curseLayout.value;
+    playersContainer.classList.toggle('curse-layout-auto', automatic);
+    playersContainer.classList.toggle('curse-layout-horizontal', orientation === 'horizontal');
+    playersContainer.classList.toggle('curse-layout-vertical', orientation === 'vertical');
+    scheduleAutoCurseLayoutCheck();
   };
   updateCurseLayout();
   curseLayout.addEventListener('change', updateCurseLayout);
+  mobileCurseLayout.addEventListener('change', () => {
+    if (curseLayout.value === 'auto') updateCurseLayout();
+  });
+  window.addEventListener('resize', scheduleAutoCurseLayoutCheck);
+  new MutationObserver(scheduleAutoCurseLayoutCheck)
+    .observe(playersContainer, { childList: true, subtree: true });
 
   // When the dropdown changes
   document.getElementById('cleanseDifficulty')
@@ -1926,6 +2017,7 @@ const curses = [
             form.reset();
             form.hidden = true;
             updateDisplay();
+            collapseHeader();
         }
 
         function cancelAddPlayer() {
@@ -2220,6 +2312,42 @@ function getThrowCost(curseCost) {
 }
 
 
+let autoCurseLayoutFrame = 0;
+
+function scheduleAutoCurseLayoutCheck() {
+  cancelAnimationFrame(autoCurseLayoutFrame);
+  autoCurseLayoutFrame = requestAnimationFrame(updateAutoCurseCardLayouts);
+}
+
+function updateAutoCurseCardLayouts() {
+  const playersContainer = document.getElementById('playersContainer');
+  const curseLayout = document.getElementById('curseLayout');
+  const cards = playersContainer.querySelectorAll('.player-info.cursed');
+  const shouldCheckFit = curseLayout.value === 'auto' &&
+    playersContainer.classList.contains('curse-layout-horizontal');
+
+  cards.forEach(card => {
+    card.classList.remove('curse-content-overflow');
+    if (!shouldCheckFit) {
+      card.classList.remove('curse-layout-measuring');
+      return;
+    }
+
+    const image = card.querySelector('.curse-item-image:not([hidden]), .curse-item-icon:not([hidden])');
+    const details = card.querySelector('.curse-item-details');
+    if (!image || !details) return;
+
+    card.classList.add('curse-layout-measuring');
+    const requiredHeight = details.getBoundingClientRect().height;
+    const availableHeight = image.getBoundingClientRect().height;
+    card.classList.remove('curse-layout-measuring');
+
+    if (requiredHeight > availableHeight + 1) {
+      card.classList.add('curse-content-overflow');
+    }
+  });
+}
+
 
         // Update the display for player information
 function updateDisplay() {
@@ -2334,6 +2462,7 @@ function updateDisplay() {
 
     playersContainer.appendChild(playerDiv);
   });
+  scheduleAutoCurseLayoutCheck();
 }
 
 
@@ -2839,10 +2968,19 @@ settingsToggle.addEventListener('click', () => {
 
 const headerToggle = document.getElementById('headerToggle');
 const headerContent = document.querySelector('.header-content');
+const headerContainer = document.querySelector('.header-container');
+
+function collapseHeader() {
+  if (headerContent.classList.contains('collapsed')) return;
+  headerContent.classList.add('collapsed');
+  headerContainer.classList.add('is-collapsed');
+  headerToggle.textContent = '▲';
+  headerToggle.setAttribute('aria-expanded', 'false');
+}
 
 headerToggle.addEventListener('click', () => {
   const isHidden = headerContent.classList.toggle('collapsed');
-  // Flip arrow icon
+  headerContainer.classList.toggle('is-collapsed', isHidden);
   headerToggle.textContent = isHidden ? '▲' : '▼';
   headerToggle.setAttribute('aria-expanded', !isHidden);
 });
