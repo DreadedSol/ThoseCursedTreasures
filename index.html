@@ -262,17 +262,12 @@ body > * {
 
 
 .player-info.selected {
-  border: 6px solid #ffeb3b;
+  outline: 4px solid #ffeb3b;
+  outline-offset: 1px;
 }
 
 .player-info.cursed {
-  border-color: #800020;
-}
-
-.player-info.cursed.selected {
-  border-color: #ffeb3b;
-  outline: 2px solid #800020;
-  outline-offset: 1px;
+  border-color: #a88a55;
 }
 
 /* grey-out finished players */
@@ -452,13 +447,13 @@ body > * {
 
         .curse {
             font-style: normal;
-            margin-top: 10px;
-            background: rgba(128, 0, 32, 0.08);
+            margin-top: 8px;
+            background: rgba(180, 145, 80, 0.08);
             color: #4e342e;
-            padding: 14px;
-            border: 1px solid rgba(128, 0, 32, 0.24);
+            padding: 10px;
+            border: 1px solid rgba(168, 138, 85, 0.35);
             border-radius: 10px;
-            box-shadow: 0 2px 6px rgba(55, 38, 18, 0.16);
+            box-shadow: 0 1px 4px rgba(55, 38, 18, 0.12);
             text-align: center;
         }
 
@@ -481,7 +476,7 @@ body > * {
             border-radius: 6px;
             background: #fffdf8;
             box-shadow: 0 2px 8px rgba(55, 38, 18, 0.2);
-            border: 1px solid rgba(128, 0, 32, 0.22);
+            border: 1px solid rgba(168, 138, 85, 0.4);
         }
 
         .curse-item-icon {
@@ -504,16 +499,48 @@ body > * {
             line-height: 1.45;
             text-align: center;
             padding: 8px;
-            color: #4e342e;
-            background: rgba(255, 250, 240, 0.97);
-            border: 1px solid #c8b88a;
+            color: #fffaf3;
+            background: #9b3f35;
+            border: 1px solid #7d3029;
             border-radius: 8px;
         }
 
         .player-info.cursed .curse {
-            background: #800020;
-            border-color: #5c0017;
-            color: white;
+            background: #f0eadb;
+            border-color: #c7b58c;
+            color: #4e342e;
+        }
+
+        #playersContainer.curse-layout-horizontal .player-info.cursed .curse-item {
+            display: grid;
+            grid-template-columns: minmax(96px, 42%) minmax(0, 1fr);
+            align-items: center;
+            justify-items: center;
+            text-align: center;
+        }
+
+        #playersContainer.curse-layout-horizontal .player-info.cursed .curse-item-image,
+        #playersContainer.curse-layout-horizontal .player-info.cursed .curse-item-icon {
+            width: min(100%, 180px);
+            justify-self: center;
+        }
+
+        #playersContainer.curse-layout-horizontal .player-info.cursed .curse-item-details,
+        #playersContainer.curse-layout-horizontal .player-info.cursed .curse-item-title {
+            text-align: center;
+        }
+
+        #playersContainer.curse-layout-horizontal .player-info.cursed .curse-item-details .cleanse-cost {
+            justify-content: center;
+        }
+
+        #playersContainer.curse-layout-vertical .player-info.cursed .curse-item-image,
+        #playersContainer.curse-layout-vertical .player-info.cursed .curse-item-icon {
+            width: min(100%, 220px);
+        }
+
+        #playersContainer.curse-layout-vertical .player-info.cursed .curse-item-details {
+            width: min(100%, 300px);
         }
 
         .curse-item-title {
@@ -521,7 +548,7 @@ body > * {
             width: 100%;
             text-align: center;
             font-style: normal;
-            color: #6a4e23;
+            color: #fffaf3;
             font-size: 1rem;
         }
 
@@ -561,7 +588,7 @@ body > * {
         }
 
         .player-info button.throw-cost-button {
-            background: #800020;
+            background: #292624;
         }
 
         .player-info button.cleanse-cost-button.throw-cost-button:hover:not(:disabled) {
@@ -1116,13 +1143,14 @@ body > * {
 }
 
 #bottomBar .settings-container {
+  container-type: inline-size;
   position: static;
   left: auto;
   transform: none;
   box-sizing: border-box;
   flex: 1 1 100%;
   width: 100%;
-  max-width: 560px;
+  max-width: 760px;
   min-width: 0;
   margin: 0 auto;
   background: rgba(255, 250, 240, 0.9);
@@ -1152,6 +1180,28 @@ body > * {
 #bottomBar .settings {
   justify-content: center;
   margin: 0;
+}
+
+@container (min-width: 500px) {
+  #bottomBar .settings {
+    display: grid;
+    grid-template-columns: max-content max-content;
+    justify-content: center;
+    align-items: center;
+    column-gap: 1.25rem;
+    row-gap: 0.4rem;
+  }
+}
+
+@container (min-width: 700px) {
+  #bottomBar .settings {
+    grid-template-columns: repeat(4, max-content);
+    column-gap: 1rem;
+  }
+}
+
+#bottomBar .settings.collapsed {
+  display: none;
 }
 
 #bottomBar button#settingsToggle {
@@ -1364,6 +1414,13 @@ Devised to be played with the base game using the cave's variant. <br>
               <option value="hard">Extortion</option>
             </select>
           </label>
+          <label>
+            Curse card layout:
+            <select id="curseLayout">
+              <option value="horizontal" selected>Horizontal</option>
+              <option value="vertical">Vertical</option>
+            </select>
+          </label>
           <label><input type="checkbox" id="togglePurge" checked> Enable Purge</label>
           <label><input type="checkbox" id="toggleThrow" checked> Enable Throw Curse</label>
         </div>
@@ -1572,6 +1629,14 @@ window.addEventListener('DOMContentLoaded', () => {
   };
   updateBottomBarSpace();
   new ResizeObserver(updateBottomBarSpace).observe(bottomBar);
+
+  const curseLayout = document.getElementById('curseLayout');
+  const playersContainer = document.getElementById('playersContainer');
+  const updateCurseLayout = () => {
+    playersContainer.classList.toggle('curse-layout-horizontal', curseLayout.value === 'horizontal');
+  };
+  updateCurseLayout();
+  curseLayout.addEventListener('change', updateCurseLayout);
 
   // When the dropdown changes
   document.getElementById('cleanseDifficulty')
