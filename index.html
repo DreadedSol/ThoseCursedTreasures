@@ -2461,6 +2461,38 @@ function formatPlayerName(player) {
   `;
 }
 
+function renderCurseActions(player, index) {
+  return `
+    <button
+      class="cleanse-cost-button ${player.bonusCleansing && enablePurge ? "purge-cost-button" : ""}"
+      onclick="useRitual(${index})"
+      ${player.stash >= player.curse.cost ? "" : "disabled"}
+    >
+      ${player.bonusCleansing && enablePurge
+        ? `Purge Upgrade (cleanse ${player.curse.cost})`
+        : `Cleanse (${player.curse.cost})`}
+    </button>
+    ${enablePurge && player.stash >= player.curse.cost * 2 ? `
+      <button
+        class="cleanse-cost-button purge-cost-button"
+        onclick="purge(false, true, ${index})"
+      >
+        Purge (${player.curse.cost * 2})
+      </button>
+    ` : ""}
+    ${enableThrow &&
+        players.some((otherPlayer, otherIndex) => otherIndex !== index && !otherPlayer.curse) &&
+        Number(player.stash) >= getThrowCost(player.curse.cost) ? `
+      <button
+        class="cleanse-cost-button throw-cost-button"
+        onclick="throwCurse(${index})"
+      >
+        Throw (${getThrowCost(player.curse.cost)})
+      </button>
+    ` : ""}
+  `;
+}
+
 
         // Update the display for player information
 function updateDisplay() {
@@ -2508,35 +2540,7 @@ function updateDisplay() {
             <div class="curse-item-details">
               <strong class="curse-item-title">${player.curse.name}</strong>
               <div>${player.curse.effect}</div>
-              <div class="cleanse-cost">
-                <button
-                  class="cleanse-cost-button ${player.bonusCleansing && enablePurge ? "purge-cost-button" : ""}"
-                  onclick="useRitual(${index})"
-                  ${player.stash >= player.curse.cost ? "" : "disabled"}
-                >
-                  ${player.bonusCleansing && enablePurge
-                    ? `Purge Upgrade (cleanse ${player.curse.cost})`
-                    : `Cleanse (${player.curse.cost})`}
-                </button>
-                ${enablePurge && player.stash >= player.curse.cost * 2 ? `
-                  <button
-                    class="cleanse-cost-button purge-cost-button"
-                    onclick="purge(false, true, ${index})"
-                  >
-                    Purge (${player.curse.cost * 2})
-                  </button>
-                ` : ""}
-                ${enableThrow &&
-                    players.some((otherPlayer, otherIndex) => otherIndex !== index && !otherPlayer.curse) &&
-                    Number(player.stash) >= getThrowCost(player.curse.cost) ? `
-                  <button
-                    class="cleanse-cost-button throw-cost-button"
-                    onclick="throwCurse(${index})"
-                  >
-                    Throw (${getThrowCost(player.curse.cost)})
-                  </button>
-                ` : ""}
-              </div>
+              <div class="cleanse-cost">${renderCurseActions(player, index)}</div>
             </div>
           </div>
         ` : `
@@ -2616,6 +2620,34 @@ function updateDisplay() {
   scheduleAutoCurseLayoutCheck();
 }
 
+function updatePlayerStashDisplay(playerIndex) {
+  const player = players[playerIndex];
+  const playerCard = document.querySelector(
+    `.player-info[data-player-index="${playerIndex}"]`
+  );
+  const stashAmount = playerCard?.querySelector('.stash-amount');
+  const stashValue = stashAmount?.querySelector('strong');
+  const removeButton = playerCard?.querySelector(
+    '.stash-controls button[aria-label="Remove one from stash"]'
+  );
+
+  if (!player || !stashAmount || !stashValue || !removeButton) {
+    throw new Error(`Unable to update stash display for player ${playerIndex}.`);
+  }
+
+  stashValue.textContent = player.stash;
+  stashAmount.setAttribute('aria-label', `Stash: ${player.stash}`);
+  removeButton.disabled = player.stash === 0;
+
+  if (player.curse) {
+    const curseActions = playerCard.querySelector('.cleanse-cost');
+    if (!curseActions) {
+      throw new Error(`Unable to update curse actions for player ${playerIndex}.`);
+    }
+    curseActions.innerHTML = renderCurseActions(player, playerIndex);
+    scheduleAutoCurseLayoutCheck();
+  }
+}
 
         // Change stash amount (Add or subtract gold)
         function changeStash(playerIndex, amount) {
@@ -2623,7 +2655,7 @@ function updateDisplay() {
             if (!player || player.stash + amount < 0) return;
             saveHistory();
             player.stash += amount;
-            updateDisplay();
+            updatePlayerStashDisplay(playerIndex);
         }
 
 function calculateScores() {
