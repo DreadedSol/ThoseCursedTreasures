@@ -3,6 +3,7 @@
 
 <head>
     <link rel="manifest" href="manifest.json">
+    <link rel="preload" as="image" href="images/parchment-map.png" fetchpriority="high">
 <meta name="theme-color" content="#b45f06">
 
     <meta charset="UTF-8" />
@@ -14,12 +15,6 @@
             font-family: Arial, sans-serif;
             padding: 20px;
             background: #f4f1e6;
-            /* Light parchment color */
-            background-image: url('images/parchment-map.png');
-            background-repeat: no-repeat;
-            background-size: cover;
-            background-attachment: fixed;
-            background-position: center center;
             color: #6a4e23;
             /* Earthy brown for text */
         }
@@ -28,7 +23,12 @@
   content: "";
   position: fixed;
   inset: 0;
-  background: rgba(255, 245, 220, 0.6);
+  background-image:
+    linear-gradient(rgba(255, 245, 220, 0.6), rgba(255, 245, 220, 0.6)),
+    url('images/parchment-map.png');
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
   pointer-events: none;
   z-index: 0;
 }
