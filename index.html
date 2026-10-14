@@ -351,17 +351,134 @@ body > * {
   outline-offset: 3px;
 }
 
-.player-info .token.treasure-count {
+.player-info .treasure-count {
+  display: inline-flex;
   flex: 0 0 auto;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
   margin: 0;
-  padding: 3px 8px;
-  border: 1px solid rgba(140, 123, 90, 0.35);
-  border-radius: 999px;
-  background: rgba(255, 250, 240, 0.75);
+  padding: 3px 6px;
+  border: 1px solid rgba(140, 123, 90, 0.55);
+  border-radius: 6px;
+  background: rgba(255, 250, 240, 0.88);
   color: #6a4e23;
-  font-size: 0.8rem;
-  line-height: 1.3;
+  box-shadow: inset 0 1px 2px rgba(75, 55, 30, 0.1), 0 1px 2px rgba(70, 48, 20, 0.1);
+  line-height: 1;
   white-space: nowrap;
+}
+
+.treasure-map-icon {
+  display: block;
+  flex: 0 0 23px;
+  width: 23px;
+  height: 23px;
+  overflow: visible;
+}
+
+.treasure-map-paper {
+  fill: #efe1bd;
+  stroke: #8c7b5a;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+}
+
+.treasure-map-route {
+  fill: none;
+  stroke: rgba(140, 123, 90, 0.58);
+  stroke-dasharray: 1.5 2;
+  stroke-linecap: round;
+  stroke-width: 1.5;
+}
+
+.treasure-map-route-progress {
+  fill: none;
+  stroke: #b45f06;
+  stroke-dasharray: 100;
+  stroke-dashoffset: var(--treasure-route-offset, 100);
+  stroke-linecap: round;
+  stroke-width: 2;
+}
+
+.treasure-count.is-stamping .treasure-map-route-progress {
+  animation: treasure-route-unfurl 620ms cubic-bezier(0.2, 0.72, 0.28, 1) both;
+}
+
+.treasure-map-checkpoint {
+  fill: #efe1bd;
+  stroke: #8c7b5a;
+  stroke-width: 1;
+  transition: fill 220ms ease-out, stroke 220ms ease-out, r 220ms ease-out;
+}
+
+.treasure-map-checkpoint.is-visited {
+  fill: #c78316;
+  stroke: #fffaf3;
+}
+
+.treasure-map-marker {
+  fill: #a3432f;
+  stroke: #fffaf3;
+  stroke-width: 1.4;
+}
+
+.treasure-count-copy {
+  display: grid;
+  justify-items: start;
+  gap: 2px;
+}
+
+.treasure-count-number {
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.treasure-count-label {
+  color: #806b47;
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.treasure-count.is-stamping {
+  transform-origin: 50% 55%;
+  animation: treasure-stamp 560ms cubic-bezier(0.18, 0.78, 0.28, 1) both;
+}
+
+.treasure-count.is-stamping .treasure-map-marker {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: treasure-marker-stamp 620ms cubic-bezier(0.18, 0.78, 0.28, 1) both;
+}
+
+@keyframes treasure-stamp {
+  0% { opacity: 0.6; transform: translateY(-6px) scale(0.82) rotate(-4deg); }
+  48% { opacity: 1; transform: translateY(1px) scale(1.12) rotate(1deg); }
+  70% { transform: translateY(-1px) scale(0.96) rotate(0); }
+  100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
+}
+
+@keyframes treasure-marker-stamp {
+  0% { opacity: 0; transform: translateY(-7px) scale(2.4) rotate(-35deg); }
+  48% { opacity: 1; transform: translateY(0) scale(0.72) rotate(8deg); }
+  70% { transform: scale(1.2) rotate(-3deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@keyframes treasure-route-unfurl {
+  from { stroke-dashoffset: var(--treasure-route-start-offset, 100); }
+  to { stroke-dashoffset: var(--treasure-route-offset, 100); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .treasure-count.is-stamping,
+  .treasure-count.is-stamping .treasure-map-marker,
+  .treasure-count.is-stamping .treasure-map-route-progress {
+    animation-duration: 1ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
   
 
@@ -397,13 +514,167 @@ body > * {
   top: 10px;
   left: 50%;
   transform: translateX(-50%);
-  background: #ff9800;
-  color: white;
   padding: 8px 16px;
   border-radius: 4px;
+  background: #ff9800;
+  color: white;
   font-weight: bold;
-  z-index: 10000;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  z-index: 1200;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+#throwBanner.throw-ritual-backdrop {
+  inset: 0;
+  left: 0;
+  top: 0;
+  transform: none;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  padding: 20px;
+  background: rgba(106, 78, 35, 0.24);
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(1px);
+  color: #6a4e23;
+  z-index: 1200;
+}
+
+.throw-ritual {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  width: min(100%, 340px);
+  box-sizing: border-box;
+  padding: 20px 18px;
+  border: 2px solid #8c7b5a;
+  border-radius: 10px;
+  background-color: #fffaf3;
+  background-image: url('images/parchment-player2.png');
+  background-size: cover;
+  box-shadow: 0 4px 12px rgba(55, 38, 18, 0.24);
+  text-align: center;
+}
+
+.throw-ritual-title {
+  margin: 0;
+  color: #b45f06;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.2rem, 5vw, 1.5rem);
+  letter-spacing: 0.02em;
+}
+
+.throw-coin-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 140px;
+  height: 140px;
+}
+
+.throw-coin-orbit,
+.throw-coin-orbit::before,
+.throw-coin-orbit::after {
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(140, 123, 90, 0.48);
+  border-radius: 50%;
+  content: "";
+}
+
+.throw-coin-orbit {
+  animation: throw-orbit 2s linear infinite;
+}
+
+.throw-coin-orbit::before {
+  inset: 10px -5px;
+  transform: rotate(60deg);
+}
+
+.throw-coin-orbit::after {
+  inset: 10px -5px;
+  transform: rotate(-60deg);
+}
+
+.throw-coin {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 82px;
+  height: 82px;
+  border: 4px double #8b5718;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 25%, #fff2b1, #e5b84e 56%, #a96d1d);
+  color: #6a4e23;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 2.7rem;
+  font-weight: bold;
+  box-shadow: 0 3px 8px rgba(55, 38, 18, 0.24), inset 0 0 0 3px rgba(255, 250, 240, 0.55);
+  animation: throw-coin-toss 2s cubic-bezier(0.16, 0.78, 0.25, 1) forwards;
+  transform-style: preserve-3d;
+}
+
+.throw-ritual.is-revealed .throw-coin {
+  animation: throw-coin-land 420ms cubic-bezier(0.2, 0.8, 0.25, 1) both;
+}
+
+.throw-ritual[data-outcome="success"] .throw-coin {
+  background: radial-gradient(circle at 32% 25%, #fff3b4, #e4bb51 56%, #a9711d);
+}
+
+.throw-ritual[data-outcome="backfire"] .throw-coin {
+  background: radial-gradient(circle at 32% 25%, #e1d5c2, #8e7761 56%, #514136);
+  color: #493324;
+}
+
+.throw-ritual-reveal {
+  min-height: 1.5em;
+  margin: 0;
+  color: #6a4e23;
+  font-size: 1rem;
+  font-weight: bold;
+  opacity: 0.72;
+}
+
+.throw-ritual.is-revealed[data-outcome="success"] .throw-ritual-reveal {
+  color: #245b28;
+  animation: throw-verdict 500ms ease-out both;
+}
+
+.throw-ritual.is-revealed[data-outcome="backfire"] .throw-ritual-reveal {
+  color: #7f1d1d;
+  animation: throw-verdict 500ms ease-out both;
+}
+
+@keyframes throw-orbit {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes throw-coin-toss {
+  0% { transform: translateY(10px) rotateY(0) rotateZ(-18deg) scale(0.8); }
+  24% { transform: translateY(-24px) rotateY(540deg) rotateZ(12deg) scale(1.12); }
+  56% { transform: translateY(10px) rotateY(1260deg) rotateZ(-10deg) scale(0.94); }
+  82% { transform: translateY(-12px) rotateY(1800deg) rotateZ(5deg) scale(1.04); }
+  100% { transform: translateY(0) rotateY(2160deg) rotateZ(0) scale(1); }
+}
+
+@keyframes throw-coin-land {
+  from { transform: translateY(-8px) scale(1.18); }
+  to { transform: translateY(0) scale(1); }
+}
+
+@keyframes throw-verdict {
+  from { opacity: 0; transform: translateY(8px) scale(0.92); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #throwBanner *,
+  #throwBanner *::before,
+  #throwBanner *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
 }
 .result-box {
   background: #fff3cd;
@@ -416,18 +687,6 @@ body > * {
   font-size: 1rem;
   position: relative;
   border-radius: 4px;
-}
-
-.result-box.throw-success {
-  background: #e5f3e5;
-  border-left-color: #388e3c;
-  color: #245b28;
-}
-
-.result-box.throw-backfire {
-  background: #fbe7e7;
-  border-left-color: #c62828;
-  color: #7f1d1d;
 }
 
 .result-box button.clear-result {
@@ -469,11 +728,161 @@ body > * {
         }
 
         .curse-item {
+            position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 8px;
             text-align: center;
+        }
+
+        .player-info.is-cleansing {
+            pointer-events: none;
+        }
+
+        body.is-cleansing::after {
+            content: "";
+            position: fixed;
+            z-index: 1100;
+            inset: 0;
+            background: transparent;
+            cursor: wait;
+        }
+
+        .curse-item.is-treasure-revealed .curse-item-image,
+        .curse-item.is-treasure-revealed .curse-item-icon {
+            animation: treasure-reveal 620ms cubic-bezier(0.18, 0.78, 0.28, 1) both;
+        }
+
+        .curse-item.is-treasure-revealed .curse-item-details {
+            animation: treasure-details-reveal 500ms ease-out 120ms both;
+        }
+
+        @keyframes treasure-reveal {
+            0% { opacity: 0; filter: brightness(2) sepia(0.8); transform: translateY(22px) scale(0.72) rotate(-7deg); }
+            62% { opacity: 1; filter: brightness(1.2) sepia(0.18); transform: translateY(-5px) scale(1.06) rotate(2deg); }
+            100% { opacity: 1; filter: brightness(1) sepia(0); transform: translateY(0) scale(1) rotate(0); }
+        }
+
+        @keyframes treasure-details-reveal {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .curse-item.is-cleansing::after {
+            content: "";
+            position: absolute;
+            z-index: 2;
+            inset: 0;
+            border-radius: 10px;
+            pointer-events: none;
+            background: radial-gradient(ellipse, rgba(255, 231, 153, 0.88), rgba(255, 193, 62, 0.24) 42%, transparent 72%);
+            opacity: 0;
+            animation: cleanse-aura 900ms ease-out forwards;
+        }
+
+        .curse-item.is-cleansing .curse-item-image,
+        .curse-item.is-cleansing .curse-item-icon {
+            animation: cleanse-relic 900ms cubic-bezier(0.2, 0.72, 0.28, 1) forwards;
+        }
+
+        .curse-item.is-cleansing .curse-item-details {
+            animation: cleanse-inscription 650ms ease-in forwards;
+        }
+
+        .curse-item.is-purging::before {
+            content: "";
+            position: absolute;
+            z-index: 2;
+            inset: 8%;
+            border: 2px solid rgba(255, 218, 112, 0.9);
+            border-radius: 50%;
+            box-shadow: 0 0 12px rgba(255, 193, 62, 0.8), inset 0 0 12px rgba(255, 193, 62, 0.45);
+            pointer-events: none;
+            animation: purge-sigil 1000ms ease-out forwards;
+        }
+
+        .curse-item.is-purging::after {
+            background: radial-gradient(ellipse, rgba(255, 248, 208, 0.98), rgba(255, 193, 62, 0.58) 36%, rgba(170, 100, 19, 0.22) 62%, transparent 78%);
+            animation-name: purge-aura;
+            animation-duration: 1000ms;
+        }
+
+        .curse-item.is-purging .curse-item-image,
+        .curse-item.is-purging .curse-item-icon {
+            animation-name: purge-relic;
+            animation-duration: 1000ms;
+            animation-timing-function: cubic-bezier(0.18, 0.8, 0.24, 1);
+        }
+
+        .curse-item.is-purging .curse-item-details {
+            animation-name: purge-inscription;
+            animation-duration: 800ms;
+        }
+
+        @keyframes cleanse-aura {
+            20% { opacity: 0.95; transform: scale(0.92); }
+            65% { opacity: 0.75; transform: scale(1.04); }
+            100% { opacity: 0; transform: scale(1.2); }
+        }
+
+        @keyframes cleanse-relic {
+            0% { opacity: 1; filter: brightness(1) sepia(0); transform: scale(1) rotate(0); }
+            28% { opacity: 1; filter: brightness(1.5) sepia(0.35); transform: scale(1.06) rotate(-3deg); }
+            100% { opacity: 0; filter: brightness(2.2) sepia(0.8); transform: translateY(-24px) scale(0.72) rotate(8deg); }
+        }
+
+        @keyframes cleanse-inscription {
+            0% { opacity: 1; transform: translateY(0); }
+            35% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(10px); }
+        }
+
+        @keyframes purge-sigil {
+            0% { opacity: 0; transform: rotate(-35deg) scale(0.42); }
+            24% { opacity: 1; }
+            68% { opacity: 0.9; transform: rotate(145deg) scale(1.12); }
+            100% { opacity: 0; transform: rotate(265deg) scale(1.34); }
+        }
+
+        @keyframes purge-aura {
+            12% { opacity: 1; transform: scale(0.72); }
+            42% { opacity: 0.98; transform: scale(1.04); }
+            72% { opacity: 0.9; transform: scale(0.96); }
+            100% { opacity: 0; transform: scale(1.3); }
+        }
+
+        @keyframes purge-relic {
+            0% { opacity: 1; filter: brightness(1) sepia(0); transform: scale(1) rotate(0); }
+            18% { filter: brightness(1.7) sepia(0.48); transform: scale(1.08) rotate(-5deg); }
+            42% { filter: brightness(1.25) sepia(0.18); transform: scale(0.98) rotate(4deg); }
+            68% { opacity: 1; filter: brightness(2.1) sepia(0.82); transform: translateY(-8px) scale(1.12) rotate(-2deg); }
+            100% { opacity: 0; filter: brightness(2.8) sepia(1); transform: translateY(-34px) scale(0.52) rotate(14deg); }
+        }
+
+        @keyframes purge-inscription {
+            0% { opacity: 1; transform: translateY(0); }
+            30% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(14px); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .curse-item.is-cleansing::after,
+            .curse-item.is-cleansing .curse-item-image,
+            .curse-item.is-cleansing .curse-item-icon,
+            .curse-item.is-cleansing .curse-item-details,
+            .curse-item.is-purging::before,
+            .curse-item.is-purging::after,
+            .curse-item.is-purging .curse-item-image,
+            .curse-item.is-purging .curse-item-icon,
+            .curse-item.is-purging .curse-item-details,
+            .curse-item.is-treasure-revealed .curse-item-image,
+            .curse-item.is-treasure-revealed .curse-item-icon,
+            .curse-item.is-treasure-revealed .curse-item-details,
+            .player-info button.draw-treasure-button {
+                animation-duration: 1ms;
+                transition-duration: 0.01ms;
+            }
         }
 
         .curse-item-image,
@@ -644,6 +1053,49 @@ body > * {
             background: #9a9182;
             cursor: not-allowed;
             opacity: 0.8;
+        }
+
+        .player-info button.draw-treasure-button {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: fit-content;
+            margin-top: 8px;
+            padding: 9px 16px;
+            overflow: hidden;
+            border: 1px solid #d9b65b;
+            border-radius: 7px;
+            background: linear-gradient(145deg, #526f32, #344f24 62%, #263d1c);
+            color: #fff8df;
+            box-shadow: inset 0 1px 0 rgba(255, 245, 195, 0.35), 0 3px 0 #1f3518, 0 5px 10px rgba(37, 54, 24, 0.3);
+            letter-spacing: 0.02em;
+            text-shadow: 0 1px 2px rgba(25, 37, 17, 0.55);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+        }
+
+        .player-info button.draw-treasure-button::before {
+            content: "🧭";
+            font-size: 1.1em;
+            filter: drop-shadow(0 1px 1px rgba(25, 37, 17, 0.4));
+        }
+
+        .player-info button.draw-treasure-button:hover:not(:disabled) {
+            background: linear-gradient(145deg, #688a3d, #3e6029 62%, #2e491f);
+            transform: translateY(-2px);
+            box-shadow: inset 0 1px 0 rgba(255, 245, 195, 0.45), 0 5px 0 #1f3518, 0 8px 14px rgba(37, 54, 24, 0.36);
+            filter: brightness(1.06);
+        }
+
+        .player-info button.draw-treasure-button:active:not(:disabled) {
+            transform: translateY(2px);
+            box-shadow: inset 0 1px 3px rgba(25, 37, 17, 0.35), 0 1px 0 #1f3518;
+        }
+
+        .player-info button.draw-treasure-button:focus-visible {
+            outline: 3px solid #e7bf58;
+            outline-offset: 3px;
         }
 
         .token {
@@ -1784,12 +2236,14 @@ body > * {
         let history = [];
         let throwMode = false;
         let throwSourceIndex = null;
+        let throwResolutionInProgress = false;
         let enableThrow      = true;
         let enablePurge      = true;
         let cleanseDifficulty = 'normal';
         let currentRound = 1;
         let shrineState = 'waiting';
         let shrineDistance = null;
+        const cleansingPlayers = new Set();
 
 
 
@@ -2137,8 +2591,16 @@ function drawTreasure(playerIndex) {
   if (!player) {
     return showMessage("Player not found.");
   }
+  if (cleansingPlayers.has(playerIndex)) return;
   if (player.curse) {
     return showMessage("This player is already cursed.");
+  }
+
+  const playerCard = document.querySelector(
+    `.player-info[data-player-index="${playerIndex}"]`
+  );
+  if (!playerCard?.querySelector('.draw-treasure-button')) {
+    throw new Error(`Unable to animate treasure draw for player ${playerIndex}.`);
   }
 
   selectedPlayerIndex = playerIndex;
@@ -2160,7 +2622,7 @@ function drawTreasure(playerIndex) {
   if (player.immunity) {
     consumeCurseImmunity(player);
     showResult("🕊️ Your Spirit Guide protects you — you resist this curse!");
-    updateDisplay();
+    updateDisplay({ stampTreasurePlayerIndex: playerIndex });
     return;
   }
 
@@ -2172,8 +2634,21 @@ function drawTreasure(playerIndex) {
   // 5) Otherwise assign a new curse:
   const baseCurse = curses[Math.floor(Math.random() * curses.length)];
   player.curse = { ...baseCurse, cost: getRandomCurseCost() };
-
-  updateDisplay();
+  updateDisplay({ stampTreasurePlayerIndex: playerIndex });
+  const revealedCurse = document.querySelector(
+    `.player-info[data-player-index="${playerIndex}"] .curse-item`
+  );
+  if (revealedCurse && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    revealedCurse.classList.add('is-treasure-revealed');
+    revealedCurse.addEventListener('animationend', event => {
+      if (event.target === revealedCurse && event.animationName === 'treasure-reveal') {
+        revealedCurse.classList.remove('is-treasure-revealed');
+      }
+    });
+    window.setTimeout(() => {
+      revealedCurse.classList.remove('is-treasure-revealed');
+    }, 900);
+  }
 }
 
 
@@ -2202,7 +2677,7 @@ function drawTreasure(playerIndex) {
             player.curse = curse;
             player.treasures += 1;
 
-            updateDisplay();
+            updateDisplay({ stampTreasurePlayerIndex: selectedPlayerIndex });
         }
 
         function finishThrow(isSuccess, source, target) {
@@ -2219,26 +2694,66 @@ function drawTreasure(playerIndex) {
     source.curse.cost *= 2;
   }
 
-  // show the result box
-  showResult(
-    isSuccess
-      ? `<strong>Success!</strong> Curse thrown to ${target.name}!`
-      : `<strong>Backfire!</strong> You keep the curse and ${source.curse.name} cleanse cost doubles to ${source.curse.cost} gold.`,
-    isSuccess ? 'throw-success' : 'throw-backfire'
-  );
-
   // end throw‐mode and refresh
   throwMode = false;
+  throwSourceIndex = null;
+  throwResolutionInProgress = false;
+  const resultPlayerIndex = players.indexOf(isSuccess ? target : source);
   updateDisplay();
+  document.querySelector(
+    `.player-info[data-player-index="${resultPlayerIndex}"]`
+  )?.focus();
 }
 
 
 
         // Function to display the shrine when the right turn comes
-function useRitual(playerIndex = selectedPlayerIndex) {
+async function animateCurseRemoval(playerIndex, advanced = false) {
+  const card = document.querySelector(
+    `.player-info[data-player-index="${playerIndex}"]`
+  );
+  const curseItem = card?.querySelector('.curse-item');
+  if (!card || !curseItem) {
+    throw new Error(`Unable to animate curse removal for player ${playerIndex}.`);
+  }
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  cleansingPlayers.add(playerIndex);
+  document.body.classList.add('is-cleansing');
+  card.classList.add('is-cleansing');
+  curseItem.classList.add('is-cleansing');
+  if (advanced) curseItem.classList.add('is-purging');
+  card.setAttribute('aria-busy', 'true');
+
+  try {
+    await new Promise(resolve => {
+      let timeoutId;
+      const finish = event => {
+        if (event && event.target !== curseItem) return;
+        window.clearTimeout(timeoutId);
+        curseItem.removeEventListener('animationend', finish);
+        resolve();
+      };
+      timeoutId = window.setTimeout(finish, 1000);
+      curseItem.addEventListener('animationend', finish);
+    });
+  } finally {
+    cleansingPlayers.delete(playerIndex);
+    card.classList.remove('is-cleansing');
+    curseItem.classList.remove('is-cleansing', 'is-purging');
+    card.removeAttribute('aria-busy');
+    if (cleansingPlayers.size === 0) {
+      document.body.classList.remove('is-cleansing');
+    }
+  }
+}
+
+async function useRitual(playerIndex = selectedPlayerIndex) {
   if (playerIndex === null || !players[playerIndex]) {
     return showMessage("Please select a player.");
   }
+  if (cleansingPlayers.has(playerIndex)) return;
   selectedPlayerIndex = playerIndex;
   const player = players[playerIndex];
 
@@ -2259,6 +2774,7 @@ function useRitual(playerIndex = selectedPlayerIndex) {
   if (player.bonusCleansing && enablePurge) {
     player.stash = stash - cost;
     player.bonusCleansing = false;
+    updatePlayerStashDisplay(playerIndex);
     showMessage("🔮 Wizard's Friend upgrades this ritual to a Purge! The normal cleanse cost was paid.");
     purge(true, false, playerIndex);
     return;
@@ -2266,6 +2782,7 @@ function useRitual(playerIndex = selectedPlayerIndex) {
 
   // 1) Deduct the normal cleanse cost.
   player.stash = stash - cost;
+  updatePlayerStashDisplay(playerIndex);
 
   // 2) Capture benefit *before* clearing the curse.
   const benefitMsg = player.curse.getBenefit(cost);
@@ -2275,7 +2792,9 @@ function useRitual(playerIndex = selectedPlayerIndex) {
   const consumedWizardFriend = player.bonusCleansing;
   player.bonusCleansing = false;
 
-  // 3) Finally clear the curse.
+  await animateCurseRemoval(playerIndex);
+
+  // 3) Clear the curse after its removal animation.
   player.curse = null;
 
   updateDisplay();
@@ -2288,12 +2807,13 @@ function useRitual(playerIndex = selectedPlayerIndex) {
 // ————————————————
 // 1) Update purge() to accept skipCost
 // ————————————————
-function purge(skipCost = false, recordHistory = true, playerIndex = selectedPlayerIndex) {
+async function purge(skipCost = false, recordHistory = true, playerIndex = selectedPlayerIndex) {
   if (!enablePurge) return showMessage("Purge is currently disabled in settings.");
   if (playerIndex === null || !players[playerIndex]) {
     showMessage("Please select a player.");
     return;
   }
+  if (cleansingPlayers.has(playerIndex)) return;
   selectedPlayerIndex = playerIndex;
   const player = players[playerIndex];
   if (!player.curse) {
@@ -2317,8 +2837,10 @@ function purge(skipCost = false, recordHistory = true, playerIndex = selectedPla
     : player.curse.benefit || "";
   player.benefitMessage = cleanseMsg;
 
-  // 2) Deduct the gold (unless we're skipping cost) and clear the curse:
+  // 2) Deduct the gold (unless we're skipping cost).
   if (!skipCost) player.stash -= cost;
+  updatePlayerStashDisplay(playerIndex);
+  await animateCurseRemoval(playerIndex, true);
   player.curse = null;
 
   // 3) Generate and store the purge perk:
@@ -2467,14 +2989,14 @@ function updateAutoCurseCardLayouts() {
         actions.replaceChildren(...projectedActions);
       }
 
-      requiredHeight = details.getBoundingClientRect().height;
-      availableHeight = image.getBoundingClientRect().height;
+      requiredHeight = details.offsetHeight;
+      availableHeight = image.offsetHeight;
     } finally {
       if (actions) actions.replaceChildren(...currentActions);
       card.classList.remove('curse-layout-measuring');
     }
 
-    if (requiredHeight > availableHeight + 1) {
+    if (requiredHeight > availableHeight + 8) {
       card.classList.add('curse-content-overflow');
     }
   });
@@ -2549,7 +3071,7 @@ function renderCurseActions(player, index) {
 
 
         // Update the display for player information
-function updateDisplay() {
+function updateDisplay({ stampTreasurePlayerIndex = null } = {}) {
   const playersContainer = document.getElementById("playersContainer");
   playersContainer.innerHTML = "";
   playersContainer.classList.toggle("two-player-layout", players.length === 2);
@@ -2574,10 +3096,54 @@ function updateDisplay() {
       playerDiv.classList.add("finished");
 }
 
+    const treasureRouteStep = player.treasures === 0
+      ? 0
+      : ((player.treasures - 1) % 5) + 1;
+    const treasureRouteOffset = 100 - treasureRouteStep * 20;
+    const previousRouteStep = treasureRouteStep === 1
+      ? 0
+      : treasureRouteStep - 1;
+    const treasureRouteStartOffset = 100 - previousRouteStep * 20;
+    const treasureCheckpoints = [
+      [7, 21],
+      [11, 17],
+      [15, 11],
+      [21, 14],
+      [26, 8]
+    ];
+    const treasureMarker = treasureRouteStep > 0
+      ? treasureCheckpoints[treasureRouteStep - 1]
+      : null;
+
     playerDiv.innerHTML = `
       <div class="player-name-bar">
         <span class="player-name">${formatPlayerName(player)}</span>
-        <div class="token treasure-count">Treasures: ${player.treasures}</div>
+        <div
+          class="treasure-count${index === stampTreasurePlayerIndex ? " is-stamping" : ""}"
+          role="img"
+          aria-label="Treasures: ${player.treasures}"
+        >
+          <svg class="treasure-map-icon" viewBox="0 0 32 32" aria-hidden="true" focusable="false"
+            style="--treasure-route-offset: ${treasureRouteOffset}; --treasure-route-start-offset: ${treasureRouteStartOffset}">
+            <path class="treasure-map-paper" d="M3.5 7.5 11 4l10 3 7.5-3v20.5L21 28l-10-3-7.5 3z"/>
+            <path d="M11 4v21M21 7v21" fill="none" stroke="#8c7b5a" stroke-width="1.3"/>
+            <path class="treasure-map-route" d="M7 21 11 17 15 11 21 14 26 8"/>
+            <path class="treasure-map-route-progress" pathLength="100" d="M7 21 11 17 15 11 21 14 26 8"/>
+            ${treasureCheckpoints.map(([x, y], checkpointIndex) => `
+              <circle
+                class="treasure-map-checkpoint${checkpointIndex < treasureRouteStep ? " is-visited" : ""}"
+                cx="${x}" cy="${y}" r="1.35"
+              />
+            `).join("")}
+            ${treasureMarker
+              ? `<circle class="treasure-map-marker" cx="${treasureMarker[0]}" cy="${treasureMarker[1]}" r="2.5"/>`
+              : ""}
+          </svg>
+          <span class="treasure-count-copy">
+            <strong class="treasure-count-number">${player.treasures}</strong>
+            <span class="treasure-count-label">Treasures</span>
+          </span>
+        </div>
         <button class="remove-btn" onclick="showRemoveConfirm(${index})">×</button>
       </div>
       <div class="curse">
@@ -2758,6 +3324,7 @@ function clearThrowUI() {
   // exit throw mode
   throwMode = false;
   throwSourceIndex = null;
+  throwResolutionInProgress = false;
   // remove banner
   document.getElementById("throwBanner")?.remove();
   // un-highlight any cards
@@ -2768,6 +3335,7 @@ function clearThrowUI() {
 function selectPlayer(index) {
   clearTransientNotifications();
   if (throwMode) {
+    if (throwResolutionInProgress) return;
     const source = players[throwSourceIndex];
     const target = players[index];
     const halfCost = source && source.curse
@@ -2807,52 +3375,55 @@ function selectPlayer(index) {
     source.stash -= halfCost;
     const isSuccess = Math.random() < 0.5;
 
-      // ————— Create the roulette spinner banner —————
-      const banner = document.createElement('div');
-      Object.assign(banner.style, {
-        position: 'fixed',
-        top:    '40%',
-        left:   '50%',
-        transform: 'translate(-50%, -50%)',
-        padding:    '20px 40px',
-        backgroundColor: '#8c7b5a',
-        color:     'white',
-        fontSize:  '2.5rem',
-        fontWeight:'bold',
-        borderRadius:'10px',
-        boxShadow:  '0 4px 10px rgba(0,0,0,0.5)',
-        zIndex:    '9999'
-      });
-      document.body.appendChild(banner);
+    throwResolutionInProgress = true;
+    document.querySelectorAll('.player-info.highlight-target')
+      .forEach(card => card.classList.remove('highlight-target'));
+    document.getElementById('throwBanner')?.remove();
 
-      let words = ['THROW!', 'BACKFIRE!'];
-      let currentIndex = 0;
-      let delay = 100;
+    const banner = document.createElement('div');
+    banner.id = 'throwBanner';
+    banner.className = 'throw-ritual-backdrop';
+    banner.setAttribute('role', 'alertdialog');
+    banner.setAttribute('aria-modal', 'true');
+    banner.setAttribute('aria-live', 'assertive');
+    banner.setAttribute('aria-label', 'Throw Curse outcome');
+    banner.tabIndex = -1;
+    banner.addEventListener('keydown', event => {
+      if (event.key === 'Tab') event.preventDefault();
+    });
+    banner.innerHTML = `
+      <div class="throw-ritual" aria-atomic="true">
+        <h2 class="throw-ritual-title">The curse is cast…</h2>
+        <div class="throw-coin-stage" aria-hidden="true">
+          <span class="throw-coin-orbit"></span>
+          <span class="throw-coin">✦</span>
+        </div>
+        <p class="throw-ritual-reveal">The fates are turning</p>
+      </div>
+    `;
+    document.body.appendChild(banner);
+    banner.focus();
 
-      // ————— The decelerating spin function —————
-      function spinRoulette() {
-        banner.textContent = words[currentIndex % 2];
-        currentIndex++;
-        if (delay < 500) {
-          delay += 30;
-          setTimeout(spinRoulette, delay);
-        } else {
-          banner.textContent = isSuccess ? 'THROW!' : 'BACKFIRE!';
-          setTimeout(() => {
-            banner.remove();
-            finishThrow(isSuccess, source, target);
-          }, 650);
-        }
-      }
+    const ritual = banner.querySelector('.throw-ritual');
+    const coin = banner.querySelector('.throw-coin');
+    const reveal = banner.querySelector('.throw-ritual-reveal');
+    const title = banner.querySelector('.throw-ritual-title');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const spinDuration = reducedMotion ? 100 : 2000;
+    const revealDuration = 2800;
 
-      // start the spin!
-      spinRoulette();
+    window.setTimeout(() => {
+      if (!banner.isConnected) return;
+      ritual.dataset.outcome = isSuccess ? 'success' : 'backfire';
+      ritual.classList.add('is-revealed');
+      title.textContent = isSuccess ? 'The curse finds a new bearer!' : 'The curse turns back!';
+      coin.textContent = isSuccess ? '✓' : '×';
+      reveal.textContent = isSuccess ? `Curse passed to ${target.name}` : 'Backfire — cleansing cost doubled';
 
-// remove banner & highlights
-const b = document.getElementById("throwBanner");
-if (b) b.remove();
-document.querySelectorAll('.player-info.highlight-target')
-        .forEach(c => c.classList.remove('highlight-target'));
+      window.setTimeout(() => {
+        if (banner.isConnected) finishThrow(isSuccess, source, target);
+      }, revealDuration);
+    }, spinDuration);
 
 
     } else {
@@ -2898,6 +3469,7 @@ document.querySelectorAll('.player-info.highlight-target')
 
 
         function undo() {
+            if (cleansingPlayers.size > 0) return;
             clearTransientNotifications();
             if (history.length === 0) {
                 showMessage("No actions to undo.");
@@ -3060,7 +3632,6 @@ function useShrine() {
         function showMessage(text, onClose) {
           if (pendingConfirmAction) return;
           const box = document.getElementById('resultBox');
-          box.classList.remove('throw-success', 'throw-backfire');
           box.innerHTML = `
             <button class="clear-result" onclick="hideResult();${onClose||''}">×</button>
             <p>${text}</p>
@@ -3073,7 +3644,6 @@ function useShrine() {
 function showResult(html, outcomeClass = '') {
   if (pendingConfirmAction) return;
   const box = document.getElementById('resultBox');
-  box.classList.remove('throw-success', 'throw-backfire');
   if (outcomeClass) box.classList.add(outcomeClass);
   box.innerHTML = `
     <button class="clear-result" onclick="hideResult()">×</button>
@@ -3085,7 +3655,7 @@ function showResult(html, outcomeClass = '') {
 function hideResult() {
   const box = document.getElementById('resultBox');
   box.style.display = 'none';
-  box.classList.remove('throw-success', 'throw-backfire', 'confirmation');
+  box.classList.remove('confirmation');
   box.innerHTML = '';
   pendingConfirmAction = null;
 }
@@ -3093,7 +3663,6 @@ function hideResult() {
 function showConfirm(text, onYes) {
   const box = document.getElementById('resultBox');
   pendingConfirmAction = onYes;
-  box.classList.remove('throw-success', 'throw-backfire');
   box.classList.add('confirmation');
   box.replaceChildren();
 
