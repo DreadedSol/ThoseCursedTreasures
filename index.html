@@ -321,6 +321,13 @@ body > * {
   background-color: #333;
 }
 
+.no-curse {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
 /* override absolute‐positioned remove‐btn and keep it inline */
 .player-name-bar .remove-btn {
   position: static;
@@ -1096,94 +1103,61 @@ body > * {
     transition: background-color 0.3s ease;
 }
 
-.header-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  max-width: 1120px;
-  margin: 0 auto 1rem;
-}
-
-.header-content {
+.welcome-dialog {
   box-sizing: border-box;
-  width: 100%;
-  padding: 1.25rem clamp(1rem, 4vw, 3rem);
-  padding-right: clamp(3.5rem, 7vw, 5rem);
-  background:
-    linear-gradient(rgba(255, 250, 240, 0.78), rgba(255, 250, 240, 0.78)),
-    url('images/parchment-player2.png') center/cover;
-  border: 1px solid rgba(140, 123, 90, 0.48);
-  border-radius: 12px;
-  box-shadow: 0 5px 16px rgba(55, 38, 18, 0.16);
+  width: min(90vw, 520px);
+  max-height: min(85vh, 680px);
+  overflow-y: auto;
+  padding: clamp(20px, 5vw, 36px);
+  color: #4e342e;
+  background-color: #fffaf3;
+  background-image:
+    url('images/parchment-player2.png'),
+    linear-gradient(#fffaf3, #fffaf3);
+  background-size: cover;
+  background-blend-mode: multiply;
+  border: 2px solid #8c7b5a;
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(30, 22, 12, 0.35);
   text-align: center;
-  transition: padding 0.2s ease, opacity 0.2s ease;
 }
 
-.header-content h1 {
-  margin: 0.2rem 0 0.8rem;
-  font-size: clamp(1.8rem, 5vw, 2.5rem);
-  line-height: 1.12;
-  text-wrap: balance;
+.welcome-dialog::backdrop {
+  background: rgba(31, 25, 17, 0.58);
+  backdrop-filter: blur(3px);
 }
 
-.header-content p {
-  max-width: 860px;
-  margin: 0 auto;
-  line-height: 1.5;
-}
-
-
-.header-content.collapsed {
-  display: none;
-}
-
-#headerToggle {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 2;
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  background: rgba(255, 250, 240, 0.9);
-  border: 1px solid rgba(140, 123, 90, 0.5);
-  border-radius: 50%;
-  box-shadow: 0 1px 3px rgba(55, 38, 18, 0.14);
-  font-size: 0.75rem;
-  line-height: 1;
-  cursor: pointer;
-  color: #6a4e23;
-}
-
-.header-container.is-collapsed {
-  height: 0;
+.welcome-dialog h1 {
   margin: 0;
+  color: #b45f06;
+  font-size: clamp(1.7rem, 6vw, 2.3rem);
+  line-height: 1.15;
 }
 
-.header-container.is-collapsed #headerToggle {
-  display: none;
+.welcome-dialog h2 {
+  margin: 8px 0 18px;
+  color: #4e342e;
+  font-size: 1.1rem;
 }
 
-@media (max-width: 600px) {
-  .header-content {
-    padding: 1rem;
-    padding-right: 3.5rem;
-    border-radius: 10px;
-  }
+.welcome-dialog p {
+  line-height: 1.55;
+}
 
-  .header-content h1 {
-    margin-bottom: 0.65rem;
-  }
+.welcome-dialog button {
+  margin-top: 12px;
+  padding: 10px 20px;
+  color: white;
+  background: #3b531a;
+  border: 0;
+  border-radius: 6px;
+  font: inherit;
+  font-weight: bold;
+  cursor: pointer;
+}
 
-  #headerToggle {
-    top: 8px;
-    right: 8px;
-    width: 24px;
-    height: 24px;
-  }
+.welcome-dialog button:hover {
+  background: #4e7331;
 }
 
 #bottomBar {
@@ -1337,12 +1311,6 @@ body > * {
   font-size: 0.9rem;
 }
 
-#bottomBar .dock-draw-treasure {
-  background-color: #3b531a;
-  padding: 10px 16px;
-  font-size: 1rem;
-}
-
 #bottomBar .btn-small,
 #bottomBar .btn-water,
 #bottomBar .bottom-bar-toggle {
@@ -1377,8 +1345,7 @@ body > * {
     font-size: 1rem;
   }
 
-  #bottomBar .btn-big,
-  #bottomBar .dock-draw-treasure {
+  #bottomBar .btn-big {
     padding: 12px 20px;
     font-size: 1.1rem;
   }
@@ -1395,8 +1362,7 @@ body > * {
     gap: 4px;
   }
 
-  #bottomBar .btn-big,
-  #bottomBar .dock-draw-treasure {
+  #bottomBar .btn-big {
     padding: 7px 9px;
     font-size: 0.85rem;
   }
@@ -1426,8 +1392,7 @@ body > * {
     gap: 2px;
   }
 
-  #bottomBar .btn-big,
-  #bottomBar .dock-draw-treasure {
+  #bottomBar .btn-big {
     padding: 5px;
     font-size: 0.75rem;
   }
@@ -1450,27 +1415,77 @@ body > * {
     font-size: 0.75rem;
   }
 }
+
+#bottomBar {
+  bottom: calc(8px + env(safe-area-inset-bottom));
+  left: 50%;
+  right: auto;
+  width: max-content;
+  max-width: calc(100% - 12px);
+  box-sizing: border-box;
+  padding: 5px 8px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(140, 123, 90, 0.7);
+  border-radius: 14px;
+  background-color: rgba(255, 250, 240, 0.88);
+  background-image: none;
+  box-shadow: 0 3px 12px rgba(55, 38, 18, 0.22);
+  backdrop-filter: blur(8px);
+}
+
+#bottomBar:not(.is-expanded) .bottom-bar-content {
+  width: auto;
+}
+
+#bottomBar:not(.is-expanded) .bottom-bar-primary {
+  flex-wrap: nowrap;
+  width: auto;
+  gap: 6px;
+}
+
+#bottomBar.is-expanded {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: auto;
+  max-width: none;
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+  transform: none;
+  border: 0;
+  border-top: 2px solid #8c7b5a;
+  border-radius: 0;
+  background-color: rgba(207, 175, 127, 0.6);
+  background-image: url('images/parchment-player2.png');
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+#bottomBar.is-expanded .bottom-bar-content {
+  width: min(100%, 760px);
+}
+
+#bottomBar.is-expanded .bottom-bar-primary {
+  flex-wrap: wrap;
+  width: 100%;
+}
     </style>
 </head>
 
 <body>
-<div class="header-container">
-  <button id="headerToggle" aria-expanded="true">▼</button>
-  <div class="header-content">
-    <h2 class="subtitle">The Quest for El Dorado:</h2>
-    <h1>Those Cursed Treasures</h1>
-    <p style="text-align: center;">
-    A homebrewed expansion for <strong>Reiner Knizia</strong>'s brilliant racing deck-builder. Conceived and implemented by <strong>DreadedSol.</strong> <br>
-Devised to be played with the base game using the cave's variant. <br>
-<strong>Extra things needed:</strong> <strong>2x</strong> (amount of boards used) <strong>tokens</strong> to represent Cursed Treasures</strong>, and <strong>1 token</strong> to represent the Shrine.</p>
-</p>
-  </div>
-</div>
+<dialog class="welcome-dialog" id="welcomeDialog" aria-labelledby="welcomeTitle">
+  <h1 id="welcomeTitle">Welcome to Those Cursed Treasures</h1>
+  <h2>The Quest for El Dorado</h2>
+  <p>A homebrewed expansion for Reiner Knizia's brilliant racing deck-builder, designed to be played with the base game using the cave variant.</p>
+  <p>To play, add each player, then use the Draw Treasure button on a player's card when they discover a treasure. Every treasure brings a curse!</p>
+  <p><strong>Extra things needed:</strong> 2 tokens per board to represent Cursed Treasures, and 1 token to represent the Shrine.</p>
+  <form method="dialog">
+    <button type="submit">Start playing</button>
+  </form>
+</dialog>
     
 <div id="bottomBar">
   <div class="bottom-bar-content" id="bottomBarContent">
     <div class="bottom-bar-primary">
-      <button class="dock-action dock-draw-treasure" onclick="drawTreasure()">Draw Treasure</button>
       <span id="roundDisplay">Round: 1</span>
       <button class="btn-big" onclick="nextRound()">Next Round</button>
       <button class="btn-water" onclick="undo()">Undo</button>
@@ -2017,7 +2032,6 @@ const curses = [
             form.reset();
             form.hidden = true;
             updateDisplay();
-            collapseHeader();
         }
 
         function cancelAddPlayer() {
@@ -2040,13 +2054,17 @@ function consumeCurseImmunity(player) {
   player.spiritGuideActive = false;
 }
 
-function drawTreasure() {
-  if (selectedPlayerIndex === null) {
-    return showMessage("Please select a player.");
+function drawTreasure(playerIndex) {
+  const player = players[playerIndex];
+  if (!player) {
+    return showMessage("Player not found.");
   }
-  saveHistory();
+  if (player.curse) {
+    return showMessage("This player is already cursed.");
+  }
 
-  const player = players[selectedPlayerIndex];
+  selectedPlayerIndex = playerIndex;
+  saveHistory();
 
   // 1) Always count the treasure for the player…
   player.treasures++;
@@ -2400,6 +2418,9 @@ function updateDisplay() {
                     ? `Purge Upgrade (cleanse ${player.curse.cost})`
                     : `Cleanse (${player.curse.cost})`}
                 </button>
+                <button class="cleanse-cost-button draw-treasure-button" disabled>
+                  Draw Treasure
+                </button>
                 ${enablePurge && player.stash >= player.curse.cost * 2 ? `
                   <button
                     class="cleanse-cost-button purge-cost-button"
@@ -2421,7 +2442,15 @@ function updateDisplay() {
               </div>
             </div>
           </div>
-        ` : "No curse"}
+        ` : `
+          <div class="no-curse">
+            <span>No curse</span>
+            <button
+              class="cleanse-cost-button draw-treasure-button"
+              onclick="drawTreasure(${index})"
+            >Draw Treasure</button>
+          </div>
+        `}
       </div>
       <div class="stash-controls">
         <button onclick="changeStash(${index}, -1)">-</button>
@@ -2885,6 +2914,7 @@ function showConfirm(text, onYes) {
 window.addEventListener('DOMContentLoaded', () => {
   hideResult();
   updateRoundDisplay();
+  document.getElementById('welcomeDialog').showModal();
 });
 
 function updateRoundDisplay() {
@@ -2895,6 +2925,7 @@ function toggleBottomBarMore() {
   const more = document.getElementById('bottomBarMore');
   const toggle = document.getElementById('bottomBarMoreToggle');
   more.hidden = !more.hidden;
+  document.getElementById('bottomBar').classList.toggle('is-expanded', !more.hidden);
   toggle.setAttribute('aria-expanded', String(!more.hidden));
   toggle.textContent = more.hidden ? '+' : '−';
 }
@@ -2964,25 +2995,6 @@ settingsToggle.addEventListener('click', () => {
   const isHidden = settingsPanel.classList.toggle('collapsed');
   settingsToggle.closest('.settings-container').classList.toggle('settings-collapsed', isHidden);
   settingsToggle.setAttribute('aria-expanded', !isHidden);
-});
-
-const headerToggle = document.getElementById('headerToggle');
-const headerContent = document.querySelector('.header-content');
-const headerContainer = document.querySelector('.header-container');
-
-function collapseHeader() {
-  if (headerContent.classList.contains('collapsed')) return;
-  headerContent.classList.add('collapsed');
-  headerContainer.classList.add('is-collapsed');
-  headerToggle.textContent = '▲';
-  headerToggle.setAttribute('aria-expanded', 'false');
-}
-
-headerToggle.addEventListener('click', () => {
-  const isHidden = headerContent.classList.toggle('collapsed');
-  headerContainer.classList.toggle('is-collapsed', isHidden);
-  headerToggle.textContent = isHidden ? '▲' : '▼';
-  headerToggle.setAttribute('aria-expanded', !isHidden);
 });
 
 if (
