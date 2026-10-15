@@ -164,6 +164,10 @@ body > * {
   cursor: pointer;
 }
 
+.add-player-quick-action[hidden] {
+  display: none;
+}
+
 .add-player-quick-action:hover {
   background: #e5f5d0;
 }
@@ -270,7 +274,7 @@ body > * {
   display: inline-flex;
   flex: 1 1 auto;
   align-items: center;
-  gap: 1em;
+  gap: 0.25em;
   min-width: 0;
 }
 
@@ -312,17 +316,20 @@ body > * {
         }
 
 .player-name-bar {
+  position: static;
   display: flex;
   align-items: center;
   gap: 8px;
   min-width: 0;
+  padding-right: 22px;
+  box-sizing: border-box;
   margin-bottom: 8px;
 }
 
 .player-name-bar .player-name {
   display: flex;
   align-items: baseline;
-  flex: 1;
+  flex: 0 1 auto;
   min-width: 0;
   overflow: hidden;
   color: #4e342e;
@@ -351,21 +358,26 @@ body > * {
   gap: 4px;
 }
 
-/* override absolute‐positioned remove‐btn and keep it inline */
 .player-info .remove-btn {
-  width: auto !important;
-  flex: 0 0 auto;
+  position: absolute;
+  top: 4px;
+  right: 5px;
+  z-index: 2;
+  width: 18px;
+  height: 18px;
   margin: 0;
-  padding: 2px 6px;
+  padding: 0;
   background: transparent;
   border: none;
-  color: #e53935;
-  font-size: 1.1rem;
+  color: #29251f;
+  font-size: 0.9rem;
   line-height: 1;
+  opacity: 0.55;
 }
 
 .player-info .remove-btn:hover {
-  background-color: rgba(140, 123, 90, 0.16);
+  background: transparent;
+  opacity: 1;
 }
 
 .player-info:focus-visible {
@@ -2748,8 +2760,9 @@ button:not(:disabled):active {
       onclick="addPlayer()"
       aria-label="Add player"
       title="Add player"
+      hidden
     >+</button>
-    <form id="addPlayerForm" onsubmit="submitAddPlayer(event)" hidden>
+    <form id="addPlayerForm" onsubmit="submitAddPlayer(event)">
       <label for="addPlayerName">Player name</label>
       <input
         id="addPlayerName"
@@ -2760,7 +2773,7 @@ button:not(:disabled):active {
       >
       <button id="submitAddPlayerButton" type="submit">Add</button>
       <label class="add-player-starting-field" for="addPlayerStarting">
-        <input id="addPlayerStarting" name="startingPlayer" type="checkbox">
+        <input id="addPlayerStarting" name="startingPlayer" type="checkbox" checked>
         Starting player
       </label>
       <button id="cancelAddPlayerButton" type="button" onclick="cancelAddPlayer()">Cancel</button>
@@ -3115,7 +3128,7 @@ const curses = [
         function cancelAddPlayer() {
             const form = document.getElementById('addPlayerForm');
             form.reset();
-            form.hidden = true;
+            form.hidden = players.length > 0;
         }
 
 
@@ -3714,6 +3727,10 @@ function updateDisplay({
   revealPurgePerk = null
 } = {}) {
   const playersContainer = document.getElementById("playersContainer");
+  document.querySelector('.add-player-quick-action').hidden = players.length === 0;
+  if (players.length === 0) {
+    document.getElementById('addPlayerForm').hidden = false;
+  }
   playersContainer.innerHTML = "";
   playersContainer.classList.toggle("two-player-layout", players.length === 2);
 
@@ -3802,7 +3819,12 @@ function updateDisplay({
             <span class="treasure-count-label">Treasures</span>
           </span>
         </div>
-        <button class="remove-btn" onclick="showRemoveConfirm(${index})">×</button>
+        <button
+          type="button"
+          class="remove-btn"
+          aria-label="Remove ${escapeHTML(player.name)}"
+          onclick="showRemoveConfirm(${index})"
+        >×</button>
       </div>
       <div class="curse">
         ${player.curse ? `
