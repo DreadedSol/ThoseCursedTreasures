@@ -75,18 +75,6 @@ body > * {
   max-width: 560px;     /* optional cap width */
 }
 
-/* keep existing collapsed behaviour */
-.settings-container .settings.collapsed {
-  display: none;
-}
-
-
-.settings.collapsed {
-  display: none;
-}
-
-
-
 .subtitle {
   text-align: center;           /* center it under the controls */
   font-family: Arial, Helvetica, sans-serif; /* or your chosen font */
@@ -191,9 +179,11 @@ body > * {
   padding: 12px;
   box-sizing: border-box;
   background-color: #fffaf3;
-  background-image: url('images/parchment-player2.png');
+  background-image:
+    linear-gradient(rgba(255, 250, 243, 0.5), rgba(255, 250, 243, 0.5)),
+    url('images/parchment-player2.png');
   background-size: cover;
-  background-blend-mode: multiply;
+  background-position: center;
   border: 1px solid #8c7b5a;
   border-radius: 8px;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
@@ -205,6 +195,21 @@ body > * {
 
 #addPlayerForm label {
   font-weight: bold;
+}
+
+#addPlayerForm .add-player-starting-field {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+#addPlayerForm .add-player-starting-field input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: #b45f06;
 }
 
 #addPlayerName {
@@ -259,6 +264,22 @@ body > * {
   outline: 2px solid rgba(166, 107, 18, 0.7);
   outline-offset: 1px;
   box-shadow: 0 0 0 3px rgba(166, 107, 18, 0.14), 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.player-name-heading {
+  display: inline-flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.starting-player-marker {
+  flex: 0 0 auto;
+  color: #b45f06;
+  font-size: 0.78em;
+  line-height: 1;
+  text-shadow: 0 1px 1px rgba(55, 38, 18, 0.2);
 }
 
 .player-info.cursed {
@@ -526,7 +547,7 @@ body > * {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-.throw-ritual-backdrop {
+#throwBanner.throw-ritual-backdrop {
   inset: 0;
   left: 0;
   top: 0;
@@ -542,8 +563,25 @@ body > * {
   z-index: 1200;
 }
 
+#throwBanner.throw-ritual-backdrop.is-mutation {
+  background: rgba(18, 16, 20, 0.82);
+  backdrop-filter: blur(5px) saturate(0.55);
+  -webkit-backdrop-filter: blur(5px) saturate(0.55);
+  transition: background 800ms ease, backdrop-filter 800ms ease;
+}
+
 .score-results-backdrop {
   position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  padding: 20px;
+  background: rgba(106, 78, 35, 0.24);
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(1px);
+  color: #6a4e23;
+  z-index: 1200;
 }
 
 .throw-ritual {
@@ -560,6 +598,14 @@ body > * {
   background-size: cover;
   box-shadow: 0 4px 12px rgba(55, 38, 18, 0.24);
   text-align: center;
+}
+
+.throw-ritual.is-mutation-pending .throw-coin {
+  animation-duration: 2.2s;
+}
+
+.throw-ritual.is-mutation-pending .throw-coin-orbit {
+  animation-duration: 2.2s;
 }
 
 .score-results {
@@ -751,12 +797,72 @@ body > * {
 }
 
 .throw-ritual[data-outcome="success"] .throw-coin {
-  background: radial-gradient(circle at 32% 25%, #fff3b4, #e4bb51 56%, #a9711d);
+  border-color: #355f2c;
+  background: radial-gradient(circle at 32% 25%, #d7f5a8, #70ad45 56%, #315e2b);
+  color: #f7ffe9;
+  box-shadow: 0 3px 8px rgba(31, 75, 35, 0.32), inset 0 0 0 3px rgba(244, 255, 225, 0.48);
+}
+
+.throw-ritual[data-outcome="success"] .throw-coin-orbit,
+.throw-ritual[data-outcome="success"] .throw-coin-orbit::before,
+.throw-ritual[data-outcome="success"] .throw-coin-orbit::after {
+  border-color: rgba(78, 115, 49, 0.62);
+}
+
+.throw-ritual.is-revealed[data-outcome="success"] .throw-ritual-title {
+  color: #2f672e;
 }
 
 .throw-ritual[data-outcome="backfire"] .throw-coin {
+  border-color: #5a3025;
   background: radial-gradient(circle at 32% 25%, #e1d5c2, #8e7761 56%, #514136);
-  color: #493324;
+  color: #fff1e8;
+  box-shadow: 0 3px 8px rgba(72, 35, 28, 0.34), inset 0 0 0 3px rgba(255, 235, 222, 0.34);
+}
+
+.throw-ritual[data-outcome="backfire"] .throw-coin-orbit,
+.throw-ritual[data-outcome="backfire"] .throw-coin-orbit::before,
+.throw-ritual[data-outcome="backfire"] .throw-coin-orbit::after {
+  border-color: rgba(127, 29, 29, 0.55);
+}
+
+.throw-ritual.is-revealed[data-outcome="backfire"] .throw-ritual-title {
+  color: #7f1d1d;
+}
+
+.throw-ritual[data-outcome="mutation"] {
+  border-color: #55483d;
+  background-image:
+    linear-gradient(110deg, rgba(49, 94, 43, 0.82) 0 49.5%, rgba(81, 45, 43, 0.86) 50.5% 100%),
+    url('images/parchment-player2.png');
+  color: #fff2df;
+  box-shadow: 0 6px 20px rgba(15, 12, 16, 0.55);
+}
+
+.throw-ritual[data-outcome="mutation"] .throw-coin {
+  border-color: #443a33;
+  background:
+    radial-gradient(circle at 32% 25%, rgba(255, 244, 216, 0.38), transparent 48%),
+    linear-gradient(90deg, #47783a 0 50%, #70413b 50% 100%);
+  color: #fff4dc;
+  box-shadow: 0 3px 10px rgba(15, 12, 16, 0.48), inset 0 0 0 3px rgba(255, 244, 225, 0.3);
+}
+
+.throw-ritual[data-outcome="mutation"] .throw-coin-orbit {
+  border-color: rgba(105, 126, 76, 0.72);
+}
+
+.throw-ritual[data-outcome="mutation"] .throw-coin-orbit::before {
+  border-color: rgba(127, 65, 58, 0.8);
+}
+
+.throw-ritual[data-outcome="mutation"] .throw-coin-orbit::after {
+  border-color: rgba(105, 126, 76, 0.72);
+}
+
+.throw-ritual.is-revealed[data-outcome="mutation"] .throw-ritual-title,
+.throw-ritual.is-revealed[data-outcome="mutation"] .throw-ritual-reveal {
+  color: #fff2df;
 }
 
 .throw-ritual-reveal {
@@ -808,6 +914,10 @@ body > * {
     animation-iteration-count: 1 !important;
     transition-duration: 1ms !important;
   }
+
+  #throwBanner.throw-ritual-backdrop.is-mutation {
+    transition-duration: 1ms !important;
+  }
 }
 
 @media screen and (max-width: 420px) {
@@ -853,8 +963,24 @@ body > * {
   max-height: calc(100vh - env(safe-area-inset-top, 0px) - 16px);
   overflow-y: auto;
   margin: 0;
-  transform: translateX(-50%);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate(-50%, -8px) scale(0.98);
+  transition: top 220ms ease, opacity 220ms ease, transform 220ms ease, visibility 0s linear 220ms;
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.35);
+}
+
+#resultBox[hidden] {
+  display: none;
+}
+
+#resultBox.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate(-50%, 0) scale(1);
+  transition: top 220ms ease, opacity 220ms ease, transform 220ms ease, visibility 0s;
 }
 
 
@@ -1325,6 +1451,8 @@ body > * {
             box-sizing: border-box;
             width: fit-content;
             max-width: 100%;
+            max-height: var(--shrine-banner-height, 1000px);
+            overflow: hidden;
             background: #ffe08a;
             border: 2px solid #b45f06;
             padding: 12px;
@@ -1339,7 +1467,28 @@ body > * {
             justify-content: center;
             gap: 0.8rem;
             box-shadow: 0 3px 12px rgba(0, 0, 0, 0.35);
+            transition: max-height 240ms cubic-bezier(0.2, 0.7, 0.2, 1),
+              padding 220ms ease, margin 220ms ease, border-width 220ms ease,
+              opacity 180ms ease, transform 220ms ease;
+            animation: shrine-banner-enter 220ms ease both;
         }
+
+@keyframes shrine-banner-enter {
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.shrine-banner.is-dismissing {
+  max-height: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-width: 0;
+  opacity: 0;
+  transform: translateY(-8px) scale(0.98);
+  animation: none;
+}
 
         /* when collapsed, only wrap the icon, not full-width */
 .shrine-banner.collapsed {
@@ -1545,7 +1694,12 @@ body > * {
 
         /* Expansion rules menu */
 .rules-menu {
-  display: none;
+  display: block;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-8px);
+  transition: opacity 220ms ease, transform 220ms ease, visibility 0s linear 220ms;
   box-sizing: border-box;
   max-width: 860px;
   width: calc(100% - 32px);
@@ -1562,6 +1716,18 @@ body > * {
   box-shadow: 0 8px 24px rgba(55, 38, 18, 0.2);
   line-height: 1.65;
   color: #4e342e;
+}
+
+.rules-menu[hidden] {
+  display: none;
+}
+
+.rules-menu.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+  transition: opacity 220ms ease, transform 220ms ease, visibility 0s;
 }
 
 @media (max-width: 600px) {
@@ -1885,24 +2051,47 @@ body > * {
   background: rgba(255, 250, 240, 0.9);
 }
 
-#bottomBar .settings-container.settings-collapsed {
-  display: none;
-}
-
-#bottomBar .settings-container:not(.settings-collapsed) {
+#bottomBar .settings-container {
   position: absolute;
   right: 8px;
   bottom: calc(100% + 8px);
   z-index: 1;
   display: block;
   box-sizing: border-box;
-  width: min(360px, calc(100vw - 24px));
-  max-width: calc(100vw - 24px);
-  padding: 8px;
-  border: 1px solid rgba(140, 123, 90, 0.7);
+  margin: 0;
+  width: min(360px, calc(90vw - 24px));
+  max-width: calc(90vw - 24px);
+  max-height: 0;
+  overflow: hidden;
+  padding: 0 8px;
+  border: 0 solid rgba(140, 123, 90, 0.7);
   border-radius: 10px;
   background: rgba(255, 250, 240, 0.96);
   box-shadow: 0 3px 12px rgba(55, 38, 18, 0.22);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition: max-height 240ms cubic-bezier(0.2, 0.7, 0.2, 1), padding 240ms ease,
+    border-width 240ms ease, opacity 180ms ease, transform 220ms ease;
+}
+
+#bottomBar .bottom-bar-more > button {
+  position: relative;
+  z-index: 2;
+}
+
+#bottomBar .bottom-bar-primary > button {
+  position: relative;
+  z-index: 2;
+}
+
+#bottomBar .settings-container.is-visible {
+  max-height: var(--panel-height, 240px);
+  padding: 8px;
+  border-width: 1px;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
 }
 
 #bottomBar .settings {
@@ -1925,13 +2114,30 @@ body > * {
   max-width: 100%;
 }
 
-#bottomBar .settings.collapsed {
-  display: none;
-}
-
 #bottomBar .bottom-bar-more[hidden],
 #bottomBar .bottom-bar-content[hidden] {
   display: none;
+}
+
+#bottomBar .bottom-bar-more {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(6px);
+  transition: max-height 240ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    opacity 180ms ease, transform 220ms ease;
+}
+
+#bottomBar .bottom-bar-more.is-visible {
+  max-height: var(--panel-height, 240px);
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+
+#bottomBar .bottom-bar-more.is-open {
+  overflow: visible;
 }
 
 #bottomBar button {
@@ -2019,14 +2225,8 @@ body > * {
   background-color: #8c7b5a;
 }
 
-#bottomBar .settings-toggle,
 #bottomBar .settings-toggle:hover {
-  background-color: #8c7b5a;
-}
-
-#bottomBar .settings-toggle[aria-expanded="true"],
-#bottomBar .settings-toggle[aria-expanded="true"]:hover {
-  background-color: #b5a27b;
+  background-color: #007ACC;
 }
 
 #roundDisplay {
@@ -2074,6 +2274,17 @@ body > * {
     font-size: 0.8rem;
   }
 
+  #bottomBar .undo-button {
+    width: 25px;
+    height: 25px;
+    padding: 3px;
+  }
+
+  #bottomBar .undo-button svg {
+    width: 17px;
+    height: 17px;
+  }
+
   #bottomBar .bottom-bar-more > .dock-add-player,
   #bottomBar .bottom-bar-more > .btn-small,
   #bottomBar .bottom-bar-more > .btn-water {
@@ -2102,6 +2313,14 @@ body > * {
   #bottomBar .bottom-bar-toggle {
     padding: 4px 5px;
     font-size: 0.7rem;
+  }
+
+  #bottomBar .bottom-bar-toggle {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
   }
 
   #bottomBar .bottom-bar-more > .dock-add-player,
@@ -2133,6 +2352,7 @@ body > * {
   background-image: none;
   box-shadow: 0 3px 12px rgba(55, 38, 18, 0.22);
   backdrop-filter: blur(8px);
+  transition: box-shadow 220ms ease, background-color 220ms ease;
 }
 
 #bottomBar:not(.is-expanded) .bottom-bar-content {
@@ -2181,6 +2401,19 @@ body > * {
     max-width: 90vw;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  #resultBox,
+  .rules-menu,
+  #bottomBar .bottom-bar-more,
+  #bottomBar .settings-container {
+    transition-duration: 1ms !important;
+  }
+
+  .shrine-banner {
+    animation-duration: 1ms !important;
+  }
+}
     </style>
 </head>
 
@@ -2218,11 +2451,11 @@ body > * {
         title="More controls"
       >+</button>
     </div>
-    <div class="bottom-bar-more" id="bottomBarMore" hidden>
+    <div class="bottom-bar-more" id="bottomBarMore" hidden inert>
       <button class="dock-action dock-add-player" onclick="addPlayer()">Add Player</button>
       <button class="btn-small" onclick="finishSelectedPlayer()">Player Finished</button>
       <button id="calculateScoresButton" class="btn-small" onclick="confirmCalculateScores()">End Game/Scores</button>
-      <button class="btn-water" onclick="toggleRulesMenu()">Rules</button>
+      <button class="btn-water" id="rulesMenuToggle" onclick="toggleRulesMenu()" aria-expanded="false" aria-controls="rulesMenu">Rules</button>
       <button
         class="btn-water settings-toggle"
         id="settingsToggle"
@@ -2231,8 +2464,8 @@ body > * {
         aria-expanded="false"
         aria-controls="gameSettings"
       >⚙️</button>
-      <div class="settings-container settings-collapsed">
-        <div class="settings collapsed" id="gameSettings">
+      <div class="settings-container" inert>
+        <div class="settings" id="gameSettings">
           <label>
             Cleanse Cost:
             <select id="cleanseDifficulty">
@@ -2262,12 +2495,12 @@ body > * {
     <div id="throwResultBox" class="result-box" style="display:none;"></div>
 
 <!-- for one‐time results like Throw Curse -->
-<div id="resultBox" class="result-box" role="status" aria-live="polite" style="display:none;"></div>
+<div id="resultBox" class="result-box" role="status" aria-live="polite" hidden inert></div>
 
 
 
     <!-- Rules Menu -->
-    <div class="rules-menu" id="rulesMenu">
+    <div class="rules-menu" id="rulesMenu" hidden inert>
       <header class="rules-menu-header">
         <div>
           <h2>💰 Every Treasure Is Cursed</h2>
@@ -2350,10 +2583,11 @@ body > * {
               <li>If you are cursed, you may attempt to <strong>throw your curse at another player</strong>.</li>
               <li>Pay <strong>half of your curse’s cleanse cost</strong> to attempt it.</li>
               <li>Select any player who does not already have a curse.</li>
-              <li>There is a <strong>50% chance</strong>:
+              <li>The throw has three possible outcomes:
                 <ul>
-                  <li>🎯 <strong>Success:</strong> They immediately receive your curse, but no treasure.</li>
-                  <li>❌ <strong>Backfire:</strong> You lose your money, keep the curse, and its cleanse cost <strong>doubles</strong>.</li>
+                  <li>🎯 <strong>Success (48%):</strong> They immediately receive your curse, but no treasure.</li>
+                  <li>❌ <strong>Backfire (51%):</strong> You lose your money, keep the curse, and its cleanse cost <strong>doubles</strong>.</li>
+                  <li>🧬 <strong>Mutation (1%):</strong> The curse is thrown to them with its cleanse cost <strong>doubled</strong>.</li>
                 </ul>
               </li>
             </ul>
@@ -2424,12 +2658,17 @@ body > * {
         required
       >
       <button id="submitAddPlayerButton" type="submit">Add</button>
+      <label class="add-player-starting-field" for="addPlayerStarting">
+        <input id="addPlayerStarting" name="startingPlayer" type="checkbox">
+        Starting player
+      </label>
       <button id="cancelAddPlayerButton" type="button" onclick="cancelAddPlayer()">Cancel</button>
     </form>
 
 
     <script>
         let players = [];
+        let startingPlayerIndex = null;
         let selectedPlayerIndex = null;
         let history = [];
         let throwMode = false;
@@ -2510,6 +2749,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('addPlayerName')
     .addEventListener('input', e => e.target.setCustomValidity(''));
+
 });
 
 
@@ -2525,6 +2765,7 @@ window.addEventListener('DOMContentLoaded', () => {
             clearTransientNotifications();
             history.push({
                 players: players.map(clonePlayerState),
+                startingPlayerIndex,
                 currentRound,
                 treasureCount,
                 shrineState,
@@ -2548,12 +2789,15 @@ function getRandomCurseCost() {
         // Toggle the visibility of the rules menu
         function toggleRulesMenu() {
             const rulesMenu = document.getElementById("rulesMenu");
-            const isOpening = rulesMenu.style.display === "none" || rulesMenu.style.display === "";
+            const toggle = document.getElementById("rulesMenuToggle");
+            const isOpening = toggle.getAttribute('aria-expanded') !== 'true';
+            setAnimatedPanelOpen(rulesMenu, isOpening);
+            toggle.setAttribute('aria-expanded', String(isOpening));
             if (isOpening) {
-                rulesMenu.style.display = "block"; // Show the menu
-                window.scrollTo({ top: 0, behavior: "smooth" });
-            } else {
-                rulesMenu.style.display = "none"; // Hide the menu
+                const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+                  ? 'auto'
+                  : 'smooth';
+                window.scrollTo({ top: 0, behavior });
             }
         }
 
@@ -2722,6 +2966,7 @@ const curses = [
         function addPlayer() {
             const form = document.getElementById('addPlayerForm');
             const input = document.getElementById('addPlayerName');
+            document.getElementById('addPlayerStarting').checked = startingPlayerIndex === null;
             form.hidden = false;
             requestAnimationFrame(() => {
                 form.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -2733,6 +2978,7 @@ const curses = [
             event.preventDefault();
             const form = document.getElementById('addPlayerForm');
             const input = document.getElementById('addPlayerName');
+            const makeStartingPlayer = document.getElementById('addPlayerStarting').checked;
             const name = input.value.trim();
             if (!name) {
                 input.setCustomValidity('Enter a player name.');
@@ -2758,6 +3004,7 @@ const curses = [
                 hasHeroCard: false,
                 finishRound: null   
             });
+            if (makeStartingPlayer) startingPlayerIndex = players.length - 1;
 
             form.reset();
             form.hidden = true;
@@ -2893,15 +3140,16 @@ function drawTreasure(playerIndex) {
             updateDisplay({ stampTreasurePlayerIndex: selectedPlayerIndex });
         }
 
-        function finishThrow(isSuccess, source, target) {
+        function finishThrow(outcome, source, target) {
   // clear UI highlights/banner
   document.querySelectorAll('.player-info.highlight-target')
           .forEach(c => c.classList.remove('highlight-target'));
   document.getElementById("throwBanner")?.remove();
 
-  // apply the result
-  if (isSuccess) {
+  // Apply the result.
+  if (outcome === 'success' || outcome === 'mutation') {
     target.curse = source.curse;
+    if (outcome === 'mutation') target.curse.cost *= 2;
     source.curse = null;
   } else {
     source.curse.cost *= 2;
@@ -2911,7 +3159,9 @@ function drawTreasure(playerIndex) {
   throwMode = false;
   throwSourceIndex = null;
   throwResolutionInProgress = false;
-  const resultPlayerIndex = players.indexOf(isSuccess ? target : source);
+  const resultPlayerIndex = players.indexOf(
+    outcome === 'success' || outcome === 'mutation' ? target : source
+  );
   updateDisplay();
   document.querySelector(
     `.player-info[data-player-index="${resultPlayerIndex}"]`
@@ -3149,6 +3399,12 @@ function getThrowCost(curseCost) {
   return Math.ceil(Number(curseCost) / 2);
 }
 
+function getThrowOutcome(roll) {
+  if (roll < 0.48) return 'success';
+  if (roll < 0.99) return 'backfire';
+  return 'mutation';
+}
+
 
 let autoCurseLayoutFrame = 0;
 
@@ -3361,7 +3617,7 @@ function updateDisplay({ stampTreasurePlayerIndex = null } = {}) {
     playerDiv.setAttribute("role", "group");
     playerDiv.setAttribute(
       "aria-label",
-      `${player.name}, ${player.treasures} treasures. Focus and press Enter or Space to select.`
+      `${player.name}${index === startingPlayerIndex ? ', starting player' : ''}, ${player.treasures} treasures. Focus and press Enter or Space to select.`
     );
     if (index === selectedPlayerIndex) {
       playerDiv.classList.add("selected");
@@ -3421,7 +3677,12 @@ function updateDisplay({ stampTreasurePlayerIndex = null } = {}) {
 
     playerDiv.innerHTML = `
       <div class="player-name-bar">
-        <span class="player-name">${formatPlayerName(player)}</span>
+        <span class="player-name-heading">
+          <span class="player-name">${formatPlayerName(player)}</span>
+          ${index === startingPlayerIndex
+            ? '<span class="starting-player-marker" title="Starting player" aria-hidden="true">★</span>'
+            : ''}
+        </span>
         <div
           class="treasure-count${index === stampTreasurePlayerIndex ? " is-stamping" : ""}"
           role="img"
@@ -3710,7 +3971,8 @@ function selectPlayer(index) {
     // ————— All checks passed: do the throw —————
     saveHistory();
     source.stash -= halfCost;
-    const isSuccess = Math.random() < 0.5;
+    const outcome = getThrowOutcome(Math.random());
+    const isMutation = outcome === 'mutation';
 
     throwResolutionInProgress = true;
     document.querySelectorAll('.player-info.highlight-target')
@@ -3719,7 +3981,7 @@ function selectPlayer(index) {
 
     const banner = document.createElement('div');
     banner.id = 'throwBanner';
-    banner.className = 'throw-ritual-backdrop';
+    banner.className = `throw-ritual-backdrop${isMutation ? ' is-mutation' : ''}`;
     banner.setAttribute('role', 'alertdialog');
     banner.setAttribute('aria-modal', 'true');
     banner.setAttribute('aria-live', 'assertive');
@@ -3729,7 +3991,7 @@ function selectPlayer(index) {
       if (event.key === 'Tab') event.preventDefault();
     });
     banner.innerHTML = `
-      <div class="throw-ritual" aria-atomic="true">
+      <div class="throw-ritual${isMutation ? ' is-mutation-pending' : ''}" aria-atomic="true">
         <h2 class="throw-ritual-title">The curse is cast…</h2>
         <div class="throw-coin-stage" aria-hidden="true">
           <span class="throw-coin-orbit"></span>
@@ -3746,20 +4008,40 @@ function selectPlayer(index) {
     const reveal = banner.querySelector('.throw-ritual-reveal');
     const title = banner.querySelector('.throw-ritual-title');
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const spinDuration = reducedMotion ? 100 : 2000;
-    const revealDuration = 2800;
+    const spinDuration = reducedMotion ? 100 : isMutation ? 2200 : 2000;
+    const mutationDimDuration = reducedMotion ? 1 : 800;
+    const revealDuration = isMutation ? 3300 : 2800;
+
+    const revealOutcome = () => {
+      if (!banner.isConnected) return;
+      ritual.dataset.outcome = outcome;
+      ritual.classList.add('is-revealed');
+      if (outcome === 'success') {
+        title.textContent = 'The curse finds a new bearer!';
+        coin.textContent = '✓';
+        reveal.textContent = `Curse thrown at ${target.name}`;
+      } else if (outcome === 'mutation') {
+        title.textContent = 'The curse mutates!';
+        coin.textContent = '⚡';
+        reveal.textContent = `Curse thrown at ${target.name} — cleanse cost doubled`;
+      } else {
+        title.textContent = 'The curse turns back!';
+        coin.textContent = '×';
+        reveal.textContent = 'Backfire — cleansing cost doubled';
+      }
+
+      window.setTimeout(() => {
+        if (banner.isConnected) finishThrow(outcome, source, target);
+      }, revealDuration);
+    };
 
     window.setTimeout(() => {
       if (!banner.isConnected) return;
-      ritual.dataset.outcome = isSuccess ? 'success' : 'backfire';
-      ritual.classList.add('is-revealed');
-      title.textContent = isSuccess ? 'The curse finds a new bearer!' : 'The curse turns back!';
-      coin.textContent = isSuccess ? '✓' : '×';
-      reveal.textContent = isSuccess ? `Curse passed to ${target.name}` : 'Backfire — cleansing cost doubled';
-
-      window.setTimeout(() => {
-        if (banner.isConnected) finishThrow(isSuccess, source, target);
-      }, revealDuration);
+      if (outcome === 'mutation') {
+        window.setTimeout(revealOutcome, mutationDimDuration);
+        return;
+      }
+      revealOutcome();
     }, spinDuration);
 
 
@@ -3804,7 +4086,6 @@ function selectPlayer(index) {
   updateDisplay();
 }
 
-
         function undo() {
             if (cleansingPlayers.size > 0) return;
             clearTransientNotifications();
@@ -3816,6 +4097,7 @@ function selectPlayer(index) {
 
             const previousState = history.pop();
             players = previousState.players;
+            startingPlayerIndex = previousState.startingPlayerIndex ?? (players.length ? 0 : null);
             currentRound = previousState.currentRound;
             treasureCount = previousState.treasureCount;
             shrineState = previousState.shrineState;
@@ -3861,12 +4143,18 @@ function getShrineDistance() {
   }
 }
 
+let shrineRenderTimer = null;
+let shrineRenderVersion = 0;
+
 function renderShrineState() {
   const wrap       = document.getElementById('shrineBannerContainer');
-  wrap.classList.toggle('is-placed-shrine', shrineState === 'placed');
+  const version = ++shrineRenderVersion;
+  if (shrineRenderTimer) clearTimeout(shrineRenderTimer);
+
+  let markup = '';
   if (shrineState === 'available') {
     const playerName = players[selectedPlayerIndex]?.name || "the active player";
-    wrap.innerHTML = `
+    markup = `
       <div id="shrineBanner" class="shrine-banner">
         ⛩️ <strong>Shrine Appears!</strong>
         <span>It’s rumoured to be <em>${shrineDistance} hexes</em> away from ${playerName}!</span>
@@ -3874,7 +4162,7 @@ function renderShrineState() {
       </div>
     `;
   } else if (shrineState === 'placed') {
-    wrap.innerHTML = `
+    markup = `
       <div id="shrineBanner" class="shrine-banner collapsed">
         <button
           id="shrineIconBtn"
@@ -3883,9 +4171,33 @@ function renderShrineState() {
         >⛩️ <strong>Use Shrine!</strong></button>
       </div>
     `;
-  } else {
-    wrap.innerHTML = '';
   }
+
+  const currentBanner = wrap.querySelector('.shrine-banner');
+  const nextIsCollapsed = shrineState === 'placed';
+  const changesBannerShape = currentBanner &&
+    (currentBanner.classList.contains('collapsed') !== nextIsCollapsed || !markup);
+
+  if (changesBannerShape) {
+    currentBanner.inert = true;
+    currentBanner.style.setProperty('--shrine-banner-height', `${currentBanner.scrollHeight}px`);
+    void currentBanner.offsetHeight;
+    currentBanner.classList.add('is-dismissing');
+    const delay = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      ? 1
+      : 260;
+    shrineRenderTimer = window.setTimeout(() => {
+      if (shrineRenderVersion !== version) return;
+      wrap.classList.toggle('is-placed-shrine', shrineState === 'placed');
+      wrap.innerHTML = markup;
+      positionTransientNotification();
+    }, delay);
+    positionTransientNotification();
+    return;
+  }
+
+  wrap.classList.toggle('is-placed-shrine', shrineState === 'placed');
+  wrap.innerHTML = markup;
   positionTransientNotification();
 }
 
@@ -3946,9 +4258,70 @@ function useShrine() {
           if (!pendingConfirmAction) hideResult();
         }
 
+        const animatedPanelStates = new WeakMap();
+        const panelTransitionDuration = 240;
+
+        function setAnimatedPanelOpen(element, isOpen, options = {}) {
+          const previousState = animatedPanelStates.get(element);
+          if (previousState?.timer) clearTimeout(previousState.timer);
+          if (previousState?.frame) cancelAnimationFrame(previousState.frame);
+
+          const state = { timer: null, frame: null };
+          animatedPanelStates.set(element, state);
+
+          if (isOpen) {
+            element.hidden = false;
+            element.inert = false;
+            if (options.measureHeight) {
+              const originalMaxHeight = element.style.maxHeight;
+              const originalPadding = element.style.padding;
+              const originalBorderWidth = element.style.borderWidth;
+              const originalTransition = element.style.transition;
+              element.style.transition = 'none';
+              element.style.maxHeight = 'none';
+              if (options.measureStyles) {
+                element.style.padding = options.measureStyles.padding || originalPadding;
+                element.style.borderWidth = options.measureStyles.borderWidth || originalBorderWidth;
+              }
+              void element.offsetHeight;
+              const borderHeight =
+                parseFloat(getComputedStyle(element).borderTopWidth) +
+                parseFloat(getComputedStyle(element).borderBottomWidth);
+              const panelHeight = element.scrollHeight + borderHeight;
+              element.style.maxHeight = originalMaxHeight;
+              element.style.padding = originalPadding;
+              element.style.borderWidth = originalBorderWidth;
+              element.style.transition = originalTransition;
+              element.style.setProperty('--panel-height', `${panelHeight}px`);
+            }
+            state.frame = requestAnimationFrame(() => {
+              if (animatedPanelStates.get(element) !== state) return;
+              element.classList.add(options.className || 'is-visible');
+              state.timer = window.setTimeout(() => {
+                if (animatedPanelStates.get(element) !== state) return;
+                options.onOpened?.();
+              }, panelTransitionDuration + 20);
+            });
+            return;
+          }
+
+          options.onClosing?.();
+          element.inert = true;
+          element.classList.remove(options.className || 'is-visible');
+          const delay = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+            ? 1
+            : panelTransitionDuration + 20;
+          state.timer = window.setTimeout(() => {
+            if (animatedPanelStates.get(element) !== state) return;
+            options.onBeforeHidden?.();
+            if (!options.keepInDom) element.hidden = true;
+            options.onClosed?.();
+          }, delay);
+        }
+
         function positionTransientNotification() {
           const box = document.getElementById('resultBox');
-          if (!box || box.style.display === 'none') return;
+          if (!box || box.hidden) return;
 
           const shrineBanner = document.querySelector('#shrineBannerContainer .shrine-banner:not(.collapsed)');
           if (shrineBanner) {
@@ -3969,11 +4342,11 @@ function useShrine() {
         function showMessage(text, onClose) {
           if (pendingConfirmAction) return;
           const box = document.getElementById('resultBox');
+          setAnimatedPanelOpen(box, true);
           box.innerHTML = `
             <button class="clear-result" onclick="hideResult();${onClose||''}">×</button>
             <p>${text}</p>
           `;
-          box.style.display = 'block';
           positionTransientNotification();
         }
 
@@ -3981,24 +4354,28 @@ function useShrine() {
 function showResult(html, outcomeClass = '') {
   if (pendingConfirmAction) return;
   const box = document.getElementById('resultBox');
+  setAnimatedPanelOpen(box, true);
   if (outcomeClass) box.classList.add(outcomeClass);
   box.innerHTML = `
     <button class="clear-result" onclick="hideResult()">×</button>
     ${html}
   `;
-  box.style.display = 'block';
   positionTransientNotification();
 }
 function hideResult() {
   const box = document.getElementById('resultBox');
-  box.style.display = 'none';
-  box.classList.remove('confirmation');
-  box.innerHTML = '';
+  setAnimatedPanelOpen(box, false, {
+    onClosed: () => {
+      box.classList.remove('confirmation');
+      box.innerHTML = '';
+    }
+  });
   pendingConfirmAction = null;
 }
 
 function showConfirm(text, onYes) {
   const box = document.getElementById('resultBox');
+  setAnimatedPanelOpen(box, true);
   pendingConfirmAction = onYes;
   box.classList.add('confirmation');
   box.replaceChildren();
@@ -4031,7 +4408,6 @@ function showConfirm(text, onYes) {
 
   actions.append(yesButton, noButton);
   box.append(closeButton, message, actions);
-  box.style.display = 'block';
   positionTransientNotification();
 }
 
@@ -4045,13 +4421,57 @@ function updateRoundDisplay() {
   document.getElementById('roundDisplay').textContent = `Round: ${currentRound}`;
 }
 
+let bottomBarCollapseTimer = null;
+
 function toggleBottomBarMore() {
   const more = document.getElementById('bottomBarMore');
   const toggle = document.getElementById('bottomBarMoreToggle');
-  more.hidden = !more.hidden;
-  document.getElementById('bottomBar').classList.toggle('is-expanded', !more.hidden);
-  toggle.setAttribute('aria-expanded', String(!more.hidden));
-  toggle.textContent = more.hidden ? '+' : '−';
+  const bottomBar = document.getElementById('bottomBar');
+  const isOpening = toggle.getAttribute('aria-expanded') !== 'true';
+  if (isOpening) {
+    if (bottomBarCollapseTimer) clearTimeout(bottomBarCollapseTimer);
+    bottomBar.style.removeProperty('transition');
+    bottomBar.style.removeProperty('width');
+    bottomBar.style.removeProperty('height');
+    bottomBar.classList.add('is-expanded');
+  }
+  setAnimatedPanelOpen(more, isOpening, {
+    measureHeight: true,
+    onOpened: () => more.classList.add('is-open'),
+    onClosing: () => more.classList.remove('is-open'),
+    onBeforeHidden: () => {
+      const expandedStyle = getComputedStyle(bottomBar);
+      const startWidth = parseFloat(expandedStyle.width);
+      const startHeight = parseFloat(expandedStyle.height);
+      bottomBar.style.width = `${startWidth}px`;
+      bottomBar.style.height = `${startHeight}px`;
+      more.hidden = true;
+      bottomBar.classList.remove('is-expanded');
+      bottomBar.style.removeProperty('width');
+      bottomBar.style.removeProperty('height');
+
+      const collapsedStyle = getComputedStyle(bottomBar);
+      const endWidth = parseFloat(collapsedStyle.width);
+      const endHeight = parseFloat(collapsedStyle.height);
+      bottomBar.style.width = `${startWidth}px`;
+      bottomBar.style.height = `${startHeight}px`;
+      bottomBar.style.transition = `width ${panelTransitionDuration}ms cubic-bezier(0.2, 0.7, 0.2, 1), height ${panelTransitionDuration}ms cubic-bezier(0.2, 0.7, 0.2, 1)`;
+      void bottomBar.offsetWidth;
+      bottomBar.style.width = `${endWidth}px`;
+      bottomBar.style.height = `${endHeight}px`;
+      const duration = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 20
+        : panelTransitionDuration + 30;
+      bottomBarCollapseTimer = window.setTimeout(() => {
+        bottomBar.style.removeProperty('width');
+        bottomBar.style.removeProperty('height');
+        bottomBar.style.removeProperty('transition');
+        bottomBarCollapseTimer = null;
+      }, duration);
+    }
+  });
+  toggle.setAttribute('aria-expanded', String(isOpening));
+  toggle.textContent = isOpening ? '−' : '+';
 }
 
 function nextRound() {
@@ -4109,6 +4529,11 @@ function removePlayer(idx) {
   if (idx < 0 || idx >= players.length) return;
   saveHistory();
   players.splice(idx, 1);  // remove from array
+  if (startingPlayerIndex === idx) {
+    startingPlayerIndex = players.length ? Math.min(idx, players.length - 1) : null;
+  } else if (startingPlayerIndex !== null && startingPlayerIndex > idx) {
+    startingPlayerIndex--;
+  }
   updateDisplay();         // refresh UI
 }
 
@@ -4116,9 +4541,23 @@ const settingsToggle = document.getElementById('settingsToggle');
 const settingsPanel  = document.querySelector('.settings');
 
 settingsToggle.addEventListener('click', () => {
-  const isHidden = settingsPanel.classList.toggle('collapsed');
-  settingsPanel.parentElement.classList.toggle('settings-collapsed', isHidden);
-  settingsToggle.setAttribute('aria-expanded', !isHidden);
+  const settingsContainer = settingsPanel.parentElement;
+  const isOpening = settingsToggle.getAttribute('aria-expanded') !== 'true';
+  setAnimatedPanelOpen(settingsContainer, isOpening, {
+    keepInDom: true,
+    measureHeight: true,
+    measureStyles: { padding: '8px', borderWidth: '1px' }
+  });
+  settingsToggle.setAttribute('aria-expanded', String(isOpening));
+});
+
+document.addEventListener('pointerdown', event => {
+  if (settingsToggle.getAttribute('aria-expanded') !== 'true') return;
+  if (!(event.target instanceof Node)) return;
+  if (settingsPanel.parentElement.contains(event.target) || settingsToggle.contains(event.target)) return;
+
+  setAnimatedPanelOpen(settingsPanel.parentElement, false, { keepInDom: true });
+  settingsToggle.setAttribute('aria-expanded', 'false');
 });
 
 if (
