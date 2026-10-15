@@ -442,18 +442,13 @@ body > * {
   fill: #efe1bd;
   stroke: #8c7b5a;
   stroke-width: 1;
-  transition: fill 220ms ease-out, stroke 220ms ease-out, r 220ms ease-out;
+  transition: fill 220ms ease-out, stroke 220ms ease-out;
 }
 
 .treasure-map-checkpoint.is-visited {
   fill: #a3432f;
   stroke: #fffaf3;
-}
-
-.treasure-map-marker {
-  fill: #a3432f;
-  stroke: #fffaf3;
-  stroke-width: 1.4;
+  stroke-width: 0.8;
 }
 
 .treasure-count-copy {
@@ -483,24 +478,11 @@ body > * {
   animation: treasure-stamp 560ms cubic-bezier(0.18, 0.78, 0.28, 1) both;
 }
 
-.treasure-map-icon.is-stamping .treasure-map-marker {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: treasure-marker-stamp 620ms cubic-bezier(0.18, 0.78, 0.28, 1) both;
-}
-
 @keyframes treasure-stamp {
   0% { opacity: 0.6; transform: translateY(-6px) scale(0.82) rotate(-4deg); }
   48% { opacity: 1; transform: translateY(1px) scale(1.12) rotate(1deg); }
   70% { transform: translateY(-1px) scale(0.96) rotate(0); }
   100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
-}
-
-@keyframes treasure-marker-stamp {
-  0% { opacity: 0; transform: translateY(-7px) scale(2.4) rotate(-35deg); }
-  48% { opacity: 1; transform: translateY(0) scale(0.72) rotate(8deg); }
-  70% { transform: scale(1.2) rotate(-3deg); }
-  100% { opacity: 1; transform: scale(1) rotate(0); }
 }
 
 @keyframes treasure-route-unfurl {
@@ -510,7 +492,6 @@ body > * {
 
 @media (prefers-reduced-motion: reduce) {
   .treasure-count.is-stamping,
-  .treasure-map-icon.is-stamping .treasure-map-marker,
   .treasure-map-icon.is-stamping .treasure-map-route-progress {
     animation-duration: 1ms !important;
     transition-duration: 0.01ms !important;
@@ -1512,7 +1493,8 @@ body > * {
             box-shadow: 0 3px 12px rgba(0, 0, 0, 0.35);
             transition: max-height 240ms cubic-bezier(0.2, 0.7, 0.2, 1),
               padding 220ms ease, margin 220ms ease, border-width 220ms ease,
-              opacity 180ms ease, transform 220ms ease;
+              opacity 180ms ease, transform 220ms ease, top 160ms ease,
+              box-shadow 160ms ease;
             animation: shrine-banner-enter 220ms ease both;
         }
 
@@ -1542,6 +1524,16 @@ body > * {
   font-size: 0.95rem;
 }
 
+.shrine-banner.collapsed:hover,
+.shrine-banner.collapsed:focus-within {
+  top: -2px;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.4);
+}
+
+.shrine-banner.collapsed:active {
+  top: 1px;
+}
+
 .shrine-banner.collapsed button {
   color: #4e342e;
   background: transparent;
@@ -1550,9 +1542,17 @@ body > * {
   font-size: 1rem !important;
 }
 
+#shrineBannerContainer .shrine-banner.collapsed button:not(:disabled):hover,
+#shrineBannerContainer .shrine-banner.collapsed button:not(:disabled):active {
+  transform: none;
+  box-shadow: none;
+  filter: none;
+  background: transparent;
+}
+
 #shrineBannerContainer.is-placed-shrine {
   top: auto;
-  bottom: calc(var(--bottom-bar-height, 72px) + 10px);
+  bottom: calc(var(--bottom-bar-height, 72px) * 1.1 + 18px + env(safe-area-inset-bottom, 0px));
 }
 
 
@@ -2698,9 +2698,9 @@ button:not(:disabled):active {
               <li>Select any player who does not already have a curse.</li>
               <li>The throw has three possible outcomes:
                 <ul>
-                  <li>🎯 <strong>Success (48%):</strong> They immediately receive your curse, but no treasure.</li>
                   <li>❌ <strong>Backfire (51%):</strong> You lose your money, keep the curse, and its cleanse cost <strong>doubles</strong>.</li>
-                  <li>🧬 <strong>Mutation (1%):</strong> The curse is thrown to them with its cleanse cost <strong>doubled</strong>.</li>
+                  <li>🎯 <strong>Success (46%):</strong> They immediately receive your curse, but no treasure.</li>
+                  <li>🧬 <strong>Mutation (3%):</strong> The curse is thrown to them with its cleanse cost <strong>doubled</strong>.</li>
                 </ul>
               </li>
             </ul>
@@ -3448,8 +3448,6 @@ async function purge(skipCost = false, recordHistory = true, playerIndex = selec
     player.spiritGuideActive = true;
   }   if (perk.includes("immunity")) {
     player.immunity = true;
-  } else if (perk.includes("Treasure Hunter's Instinct")) {
-    setTimeout(() => drawTreasureWithoutShrineCheck(false), 0);
   } else if (perk.includes("Wizard's Friend")) {
     player.bonusCleansing = true;
   }
@@ -3459,6 +3457,13 @@ async function purge(skipCost = false, recordHistory = true, playerIndex = selec
     revealCleanseBenefitPlayerIndex: playerIndex,
     revealPurgePerk: { playerIndex, perkIndex: player.purgeBenefits.length - 1 }
   });
+
+  if (perk.includes("Treasure Hunter's Instinct")) {
+    const revealDelay = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      ? 0
+      : 950;
+    window.setTimeout(() => drawTreasureWithoutShrineCheck(false), revealDelay);
+  }
 }
 
 
@@ -3517,8 +3522,8 @@ function getThrowCost(curseCost) {
 }
 
 function getThrowOutcome(roll) {
-  if (roll < 0.48) return 'success';
-  if (roll < 0.99) return 'backfire';
+  if (roll < 0.51) return 'backfire';
+  if (roll < 0.97) return 'success';
   return 'mutation';
 }
 
@@ -3774,10 +3779,6 @@ function updateDisplay({
         const routeOffset = 100 - routeStep * 20;
         const previousRouteStep = Math.max(routeStep - 1, 0);
         const routeStartOffset = 100 - previousRouteStep * 20;
-        const marker = routeStep > 0
-          ? treasureCheckpoints[routeStep - 1]
-          : null;
-
         return `
           <svg class="treasure-map-icon${index === stampTreasurePlayerIndex && mapIndex === activeTreasureMapIndex ? " is-stamping" : ""}"
             viewBox="0 0 32 32" aria-hidden="true" focusable="false"
@@ -3789,12 +3790,9 @@ function updateDisplay({
             ${treasureCheckpoints.map(([x, y], checkpointIndex) => `
               <circle
                 class="treasure-map-checkpoint${checkpointIndex < routeStep ? " is-visited" : ""}"
-                cx="${x}" cy="${y}" r="1.35"
+                cx="${x}" cy="${y}" r="${checkpointIndex < routeStep ? "2.5" : "1.35"}"
               />
             `).join("")}
-            ${marker
-              ? `<circle class="treasure-map-marker" cx="${marker[0]}" cy="${marker[1]}" r="2.5"/>`
-              : ""}
           </svg>
         `;
       }
