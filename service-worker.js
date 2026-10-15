@@ -1,5 +1,5 @@
 // service-worker.js
-const CACHE_NAME = 'cursed-treasures-v13';
+const CACHE_NAME = 'cursed-treasures-v14';
 const ASSETS = [
   './',                   // the root of your app
   'index.html',

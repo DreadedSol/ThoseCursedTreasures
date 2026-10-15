@@ -1136,6 +1136,8 @@ body > * {
         }
 
         @media (prefers-reduced-motion: reduce) {
+            .benefit.is-revealing,
+            .benefit.is-revealing::after,
             .curse-item.is-cleansing::after,
             .curse-item.is-cleansing .curse-item-image,
             .curse-item.is-cleansing .curse-item-icon,
@@ -1334,7 +1336,7 @@ body > * {
             margin-top: 8px;
             padding: 9px 16px;
             overflow: hidden;
-            border: 1px solid #d9b65b;
+            border: 1px solid rgba(255, 248, 223, 0.42);
             border-radius: 7px;
             background: linear-gradient(145deg, #526f32, #344f24 62%, #263d1c);
             color: #fff8df;
@@ -1363,7 +1365,7 @@ body > * {
         }
 
         .player-info button.draw-treasure-button:focus-visible {
-            outline: 3px solid #e7bf58;
+            outline: 3px solid #007acc;
             outline-offset: 3px;
         }
 
@@ -1416,6 +1418,35 @@ body > * {
 .benefit.cleanse-benefit {
   background: #e8f5e9;            /* pale green */
   border-left: 5px solid #4e7331; /* your dark-green button color */
+}
+
+.benefit.is-revealing {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  animation: cleanse-benefit-reveal 780ms cubic-bezier(0.18, 0.78, 0.28, 1) both;
+}
+
+.benefit.is-revealing::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -35%;
+  pointer-events: none;
+  background: radial-gradient(ellipse, rgba(255, 249, 180, 0.95), rgba(255, 220, 112, 0.5) 34%, rgba(255, 255, 255, 0) 72%);
+  animation: cleanse-benefit-aura 900ms ease-out both;
+}
+
+@keyframes cleanse-benefit-reveal {
+  0% { opacity: 0; filter: brightness(1.8) saturate(0.7); transform: translateY(16px) scale(0.92); }
+  55% { opacity: 1; filter: brightness(1.16) saturate(1.15); transform: translateY(-2px) scale(1.02); }
+  100% { opacity: 1; filter: brightness(1) saturate(1); transform: translateY(0) scale(1); }
+}
+
+@keyframes cleanse-benefit-aura {
+  0% { opacity: 0; transform: scale(0.62) rotate(-12deg); }
+  28% { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.18) rotate(8deg); }
 }
 
 /* Purge Perk = yellow-orange tab */
@@ -2288,6 +2319,13 @@ button:not(:disabled):active {
 .result-box .clear-result:not(:disabled):active,
 .score-results-close:not(:disabled):hover,
 .score-results-close:not(:disabled):active {
+  transform: none;
+  box-shadow: none;
+  filter: none;
+}
+
+.benefit .clear-benefit-btn:not(:disabled):hover,
+.benefit .clear-benefit-btn:not(:disabled):active {
   transform: none;
   box-shadow: none;
   filter: none;
@@ -3327,7 +3365,7 @@ async function useRitual(playerIndex = selectedPlayerIndex) {
   // 3) Clear the curse after its removal animation.
   player.curse = null;
 
-  updateDisplay();
+  updateDisplay({ revealCleanseBenefitPlayerIndex: playerIndex });
   if (consumedWizardFriend) {
     showMessage("Purge is disabled. Wizard's Friend was consumed without upgrading this ritual.");
   }
@@ -3404,7 +3442,10 @@ async function purge(skipCost = false, recordHistory = true, playerIndex = selec
   }
 
   // 5) Finally, re-render
-  updateDisplay();
+  updateDisplay({
+    revealCleanseBenefitPlayerIndex: playerIndex,
+    revealPurgePerk: { playerIndex, perkIndex: player.purgeBenefits.length - 1 }
+  });
 }
 
 
@@ -3418,7 +3459,7 @@ function applyCleansingBenefit(player) {
     saveHistory();
     const benefitMessage = player.curse.getBenefit(player.curse.cost);
     player.benefitMessage = benefitMessage;
-    updateDisplay();
+    updateDisplay({ revealCleanseBenefitPlayerIndex: players.indexOf(player) });
 }
 
 
@@ -3667,7 +3708,11 @@ function renderCurseActions(player, index) {
 
 
         // Update the display for player information
-function updateDisplay({ stampTreasurePlayerIndex = null } = {}) {
+function updateDisplay({
+  stampTreasurePlayerIndex = null,
+  revealCleanseBenefitPlayerIndex = null,
+  revealPurgePerk = null
+} = {}) {
   const playersContainer = document.getElementById("playersContainer");
   playersContainer.innerHTML = "";
   playersContainer.classList.toggle("two-player-layout", players.length === 2);
@@ -3812,7 +3857,7 @@ function updateDisplay({ stampTreasurePlayerIndex = null } = {}) {
       </div>
 
       ${player.benefitMessage ? `
-        <div class="benefit cleanse-benefit">
+        <div class="benefit cleanse-benefit${index === revealCleanseBenefitPlayerIndex ? " is-revealing" : ""}">
           <strong>Cleanse Benefit:</strong> ${player.benefitMessage}
           <button class="clear-benefit-btn"
                   onclick="clearCleansingBenefit(${index})">
@@ -3826,7 +3871,7 @@ function updateDisplay({ stampTreasurePlayerIndex = null } = {}) {
           const isKeep = perk.includes("KEEP");
           const clearsAutomatically = perk.includes("Spirit Guide");
           return `
-            <div class="benefit purge-benefit">
+            <div class="benefit purge-benefit${revealPurgePerk?.playerIndex === index && revealPurgePerk.perkIndex === pIdx ? " is-revealing" : ""}">
               <strong>Purge Perk:</strong><br>${perk}
               ${isKeep || clearsAutomatically ? "" : `
                 <button class="clear-benefit-btn"
@@ -4307,7 +4352,7 @@ function useShrine() {
 
   // 4) Clean up UI
   renderShrineState();
-  updateDisplay();
+  updateDisplay({ revealCleanseBenefitPlayerIndex: selectedPlayerIndex });
   showResult('<strong>Shrine used!</strong><p>The curse was cleansed for free, and the cleansing benefit was granted.</p>');
 }
 
