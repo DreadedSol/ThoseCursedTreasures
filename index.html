@@ -401,7 +401,7 @@ body > * {
   stroke-width: 2;
 }
 
-.treasure-count.is-stamping .treasure-map-route-progress {
+.treasure-map-icon.is-stamping .treasure-map-route-progress {
   animation: treasure-route-unfurl 620ms cubic-bezier(0.2, 0.72, 0.28, 1) both;
 }
 
@@ -413,7 +413,7 @@ body > * {
 }
 
 .treasure-map-checkpoint.is-visited {
-  fill: #c78316;
+  fill: #a3432f;
   stroke: #fffaf3;
 }
 
@@ -430,9 +430,11 @@ body > * {
 }
 
 .treasure-count-number {
-  font-size: 0.9rem;
-  font-variant-numeric: tabular-nums;
+  color: #806b47;
+  font-size: 0.56rem;
   font-weight: 700;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
 }
 
 .treasure-count-label {
@@ -448,7 +450,7 @@ body > * {
   animation: treasure-stamp 560ms cubic-bezier(0.18, 0.78, 0.28, 1) both;
 }
 
-.treasure-count.is-stamping .treasure-map-marker {
+.treasure-map-icon.is-stamping .treasure-map-marker {
   transform-box: fill-box;
   transform-origin: center;
   animation: treasure-marker-stamp 620ms cubic-bezier(0.18, 0.78, 0.28, 1) both;
@@ -475,8 +477,8 @@ body > * {
 
 @media (prefers-reduced-motion: reduce) {
   .treasure-count.is-stamping,
-  .treasure-count.is-stamping .treasure-map-marker,
-  .treasure-count.is-stamping .treasure-map-route-progress {
+  .treasure-map-icon.is-stamping .treasure-map-marker,
+  .treasure-map-icon.is-stamping .treasure-map-route-progress {
     animation-duration: 1ms !important;
     transition-duration: 0.01ms !important;
   }
@@ -524,7 +526,7 @@ body > * {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-#throwBanner.throw-ritual-backdrop {
+.throw-ritual-backdrop {
   inset: 0;
   left: 0;
   top: 0;
@@ -538,6 +540,10 @@ body > * {
   -webkit-backdrop-filter: blur(1px);
   color: #6a4e23;
   z-index: 1200;
+}
+
+.score-results-backdrop {
+  position: fixed;
 }
 
 .throw-ritual {
@@ -554,6 +560,132 @@ body > * {
   background-size: cover;
   box-shadow: 0 4px 12px rgba(55, 38, 18, 0.24);
   text-align: center;
+}
+
+.score-results {
+  position: relative;
+  justify-items: stretch;
+  width: min(100%, 520px);
+  max-height: min(88vh, 760px);
+  overflow-y: auto;
+  text-align: left;
+}
+
+.score-results .throw-ritual-title,
+.score-results-trophy,
+.score-results-winner,
+.score-results-subtitle {
+  text-align: center;
+}
+
+.score-results-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(140, 123, 90, 0.45);
+  border-radius: 50%;
+  background: rgba(255, 250, 243, 0.86);
+  color: #6a4e23;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.score-results-close:hover {
+  background: #f0dfbd;
+}
+
+.score-results-trophy {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  justify-self: center;
+  border: 3px double #8b5718;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 25%, #fff3b4, #e4bb51 56%, #a9711d);
+  box-shadow: 0 3px 8px rgba(55, 38, 18, 0.24), inset 0 0 0 3px rgba(255, 250, 240, 0.55);
+  font-size: 2.5rem;
+}
+
+.score-results-winner {
+  margin: 0;
+  color: #245b28;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.35rem;
+  font-weight: bold;
+}
+
+.score-results-subtitle {
+  margin: 0;
+  color: #806b47;
+  font-size: 0.82rem;
+}
+
+.score-results-list {
+  display: grid;
+  gap: 8px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.score-results-entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(140, 123, 90, 0.42);
+  border-radius: 7px;
+  background: rgba(255, 250, 240, 0.76);
+}
+
+.score-results-entry.is-winner {
+  border-color: #7b8b45;
+  background: rgba(230, 239, 207, 0.84);
+  box-shadow: inset 0 0 0 1px rgba(78, 115, 49, 0.16);
+}
+
+.score-results-player {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-weight: bold;
+}
+
+.score-results-rank {
+  margin-right: 6px;
+  color: #806b47;
+  font-size: 0.82em;
+}
+
+.score-results-score {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  min-width: 42px;
+  padding: 6px 8px;
+  border-radius: 5px;
+  background: #8c7b5a;
+  color: white;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.score-results-entry.is-winner .score-results-score {
+  background: #4e7331;
+}
+
+.score-results-breakdown {
+  grid-column: 1;
+  color: #806b47;
+  font-size: 0.78rem;
+}
+
+.score-results-close:focus-visible {
+  outline: 3px solid #007acc;
+  outline-offset: 2px;
 }
 
 .throw-ritual-title {
@@ -675,6 +807,16 @@ body > * {
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 1ms !important;
+  }
+}
+
+@media screen and (max-width: 420px) {
+  .score-results {
+    padding: 18px 12px;
+  }
+
+  .score-results-entry {
+    padding: 8px;
   }
 }
 .result-box {
@@ -1287,7 +1429,7 @@ body > * {
             align-items: center;
             justify-content: center;
             gap: 1px;
-            width: 68px;
+            width: 78.2px;
             height: 48px;
             box-sizing: border-box;
             padding: 3px;
@@ -1321,6 +1463,18 @@ body > * {
 
         .stash-meter-fill-rich-gold {
             background: linear-gradient(145deg, #edbd50, #c78316 58%, #89500b);
+        }
+
+        .stash-meter-fill-dark-gold {
+            background: linear-gradient(145deg, #c18a3c, #805014 58%, #50300b);
+        }
+
+        .stash-amount.is-cursed .stash-meter-fill-gold {
+            background: linear-gradient(145deg, #8daf69, #4e7331 58%, #354d20);
+        }
+
+        .stash-amount.is-cursed .stash-meter-fill-rich-gold {
+            background: linear-gradient(145deg, #f0a24e, #b45f06 58%, #7c3e00);
         }
 
         .stash-readout {
@@ -1793,9 +1947,30 @@ body > * {
 
 #bottomBar .btn-big {
   color: white;
-  background-color: #3b531a;
+  background: linear-gradient(145deg, #526f32, #3b531a 62%, #2d4115);
   padding: 10px 16px;
   font-size: 1rem;
+  text-shadow: 0 1px 1px rgba(25, 37, 17, 0.45);
+  box-shadow: inset 0 1px 0 rgba(255, 245, 195, 0.28), 0 2px 0 #293e13, 0 3px 6px rgba(37, 54, 24, 0.22);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+}
+
+#bottomBar .btn-big:hover {
+  background: linear-gradient(145deg, #5d7d38, #456126 62%, #344a1a);
+  transform: translateY(-1px);
+  box-shadow: inset 0 1px 0 rgba(255, 245, 195, 0.34), 0 3px 0 #293e13, 0 5px 9px rgba(37, 54, 24, 0.28);
+  filter: brightness(1.04);
+}
+
+#bottomBar .btn-big:active {
+  transform: translateY(2px);
+  box-shadow: inset 0 1px 3px rgba(25, 37, 17, 0.3), 0 0 0 #293e13;
+}
+
+#bottomBar .btn-big:focus-visible,
+#bottomBar .undo-button:focus-visible {
+  outline: 3px solid #e7bf58;
+  outline-offset: 3px;
 }
 
 #bottomBar .dock-action {
@@ -1824,6 +1999,20 @@ body > * {
 
 #bottomBar .btn-small {
   background-color: #333;
+}
+
+#bottomBar .undo-button {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 5px;
+}
+
+#bottomBar .undo-button svg {
+  display: block;
+  width: 20px;
+  height: 20px;
 }
 
 #bottomBar .bottom-bar-toggle {
@@ -1933,10 +2122,11 @@ body > * {
   left: 50%;
   right: auto;
   width: max-content;
-  max-width: calc(100% - 12px);
+  max-width: min(760px, 90vw);
   box-sizing: border-box;
-  padding: 5px 8px;
-  transform: translateX(-50%);
+  padding: 6px 9px;
+  transform: translateX(-50%) scale(1.1);
+  transform-origin: bottom center;
   border: 1px solid rgba(140, 123, 90, 0.7);
   border-radius: 14px;
   background-color: rgba(255, 250, 240, 0.88);
@@ -1952,7 +2142,7 @@ body > * {
 #bottomBar:not(.is-expanded) .bottom-bar-primary {
   flex-wrap: nowrap;
   width: auto;
-  gap: 6px;
+  gap: 7px;
 }
 
 #bottomBar.is-expanded {
@@ -1960,9 +2150,10 @@ body > * {
   left: 50%;
   right: auto;
   width: max-content;
-  max-width: calc(100% - 12px);
-  padding: 5px 8px;
-  transform: translateX(-50%);
+  max-width: min(760px, 90vw);
+  padding: 6px 9px;
+  transform: translateX(-50%) scale(1.1);
+  transform-origin: bottom center;
   border: 1px solid rgba(140, 123, 90, 0.7);
   border-radius: 14px;
   background-color: rgba(255, 250, 240, 0.88);
@@ -1987,7 +2178,7 @@ body > * {
 
 @media screen and (max-width: 480px) {
   #bottomBar.is-expanded {
-    max-width: calc(100% - 8px);
+    max-width: 90vw;
   }
 }
     </style>
@@ -2010,7 +2201,13 @@ body > * {
     <div class="bottom-bar-primary">
       <span id="roundDisplay">Round: 1</span>
       <button class="btn-big" onclick="nextRound()">Next Round</button>
-      <button class="btn-water" onclick="undo()">Undo</button>
+      <button class="btn-water undo-button" onclick="undo()" aria-label="Undo" title="Undo">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M4 9h10a6 6 0 1 1-5.7 8M4 9l5-5M4 9l5 5"
+            fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
       <button
         class="bottom-bar-toggle"
         id="bottomBarMoreToggle"
@@ -2024,7 +2221,7 @@ body > * {
     <div class="bottom-bar-more" id="bottomBarMore" hidden>
       <button class="dock-action dock-add-player" onclick="addPlayer()">Add Player</button>
       <button class="btn-small" onclick="finishSelectedPlayer()">Player Finished</button>
-      <button class="btn-small" onclick="confirmCalculateScores()">End Game/Scores</button>
+      <button id="calculateScoresButton" class="btn-small" onclick="confirmCalculateScores()">End Game/Scores</button>
       <button class="btn-water" onclick="toggleRulesMenu()">Rules</button>
       <button
         class="btn-water settings-toggle"
@@ -3044,6 +3241,47 @@ function escapeHTML(value) {
   })[character]);
 }
 
+function treasureCountInWords(value) {
+  const count = Number(value);
+  if (!Number.isSafeInteger(count) || count < 0) return String(value);
+  if (count === 0) return 'zero';
+
+  const ones = [
+    'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven',
+    'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen',
+    'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'
+  ];
+  const tens = [
+    '', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy',
+    'eighty', 'ninety'
+  ];
+  const scales = ['', 'thousand', 'million', 'billion', 'trillion', 'quadrillion'];
+  const underThousandInWords = number => {
+    if (number < 20) return ones[number];
+    if (number < 100) {
+      return `${tens[Math.floor(number / 10)]}${number % 10 ? `-${ones[number % 10]}` : ''}`;
+    }
+    return `${ones[Math.floor(number / 100)]} hundred${number % 100 ? ` ${underThousandInWords(number % 100)}` : ''}`;
+  };
+
+  const groups = [];
+  let remaining = count;
+  while (remaining > 0) {
+    groups.unshift(remaining % 1000);
+    remaining = Math.floor(remaining / 1000);
+  }
+  if (groups.length > scales.length) return String(count);
+
+  return groups
+    .map((group, index) => {
+      if (!group) return '';
+      const scale = scales[groups.length - index - 1];
+      return `${underThousandInWords(group)}${scale ? ` ${scale}` : ''}`;
+    })
+    .filter(Boolean)
+    .join(' ');
+}
+
 function formatPlayerName(player) {
   const [initial = '', ...rest] = Array.from(player.name);
   return `
@@ -3052,12 +3290,28 @@ function formatPlayerName(player) {
   `;
 }
 
-function updateStashMeter(stashAmount, stash) {
+function updateStashMeter(stashAmount, stash, cleanseCost = null) {
   const amount = Math.max(0, Number(stash));
   const goldFill = stashAmount.querySelector('.stash-meter-fill-gold');
   const richGoldFill = stashAmount.querySelector('.stash-meter-fill-rich-gold');
-  goldFill.style.setProperty('--stash-tier-fill', `${Math.min(amount, 10) * 10}%`);
-  richGoldFill.style.setProperty('--stash-tier-fill', `${Math.min(Math.max(amount - 10, 0), 10) * 10}%`);
+  const darkGoldFill = stashAmount.querySelector('.stash-meter-fill-dark-gold');
+  const numericCleanseCost = Number(cleanseCost);
+  const isCursed = Number.isFinite(numericCleanseCost) && numericCleanseCost > 0;
+  const tierSize = isCursed ? numericCleanseCost : 10;
+
+  stashAmount.classList.toggle('is-cursed', isCursed);
+  goldFill.style.setProperty(
+    '--stash-tier-fill',
+    `${Math.min(amount, tierSize) / tierSize * 100}%`
+  );
+  richGoldFill.style.setProperty(
+    '--stash-tier-fill',
+    `${Math.min(Math.max(amount - tierSize, 0), tierSize) / tierSize * 100}%`
+  );
+  darkGoldFill.style.setProperty(
+    '--stash-tier-fill',
+    `${isCursed ? 0 : Math.min(Math.max(amount - 20, 0), 10) * 10}%`
+  );
 }
 
 function renderCurseActions(player, index) {
@@ -3119,24 +3373,51 @@ function updateDisplay({ stampTreasurePlayerIndex = null } = {}) {
       playerDiv.classList.add("finished");
 }
 
-    const treasureRouteStep = player.treasures === 0
-      ? 0
-      : ((player.treasures - 1) % 5) + 1;
-    const treasureRouteOffset = 100 - treasureRouteStep * 20;
-    const previousRouteStep = treasureRouteStep === 1
-      ? 0
-      : treasureRouteStep - 1;
-    const treasureRouteStartOffset = 100 - previousRouteStep * 20;
+    const treasureMapCount = Math.max(1, Math.ceil(player.treasures / 5));
+    const activeTreasureMapIndex = Math.max(0, treasureMapCount - 1);
     const treasureCheckpoints = [
-      [7, 21],
-      [11, 17],
-      [15, 11],
+      [26, 8],
       [21, 14],
-      [26, 8]
+      [15, 11],
+      [11, 17],
+      [7, 21]
     ];
-    const treasureMarker = treasureRouteStep > 0
-      ? treasureCheckpoints[treasureRouteStep - 1]
-      : null;
+    const treasureMapsHTML = Array.from(
+      { length: treasureMapCount },
+      (_, mapPosition) => {
+        const mapIndex = treasureMapCount - mapPosition - 1;
+        const routeStep = Math.min(
+          Math.max(player.treasures - mapIndex * 5, 0),
+          5
+        );
+        const routeOffset = 100 - routeStep * 20;
+        const previousRouteStep = Math.max(routeStep - 1, 0);
+        const routeStartOffset = 100 - previousRouteStep * 20;
+        const marker = routeStep > 0
+          ? treasureCheckpoints[routeStep - 1]
+          : null;
+
+        return `
+          <svg class="treasure-map-icon${index === stampTreasurePlayerIndex && mapIndex === activeTreasureMapIndex ? " is-stamping" : ""}"
+            viewBox="0 0 32 32" aria-hidden="true" focusable="false"
+            style="--treasure-route-offset: ${routeOffset}; --treasure-route-start-offset: ${routeStartOffset}">
+            <path class="treasure-map-paper" d="M3.5 7.5 11 4l10 3 7.5-3v20.5L21 28l-10-3-7.5 3z"/>
+            <path d="M11 4v21M21 7v21" fill="none" stroke="#8c7b5a" stroke-width="1.3"/>
+            <path class="treasure-map-route" d="M26 8 21 14 15 11 11 17 7 21"/>
+            <path class="treasure-map-route-progress" pathLength="100" d="M26 8 21 14 15 11 11 17 7 21"/>
+            ${treasureCheckpoints.map(([x, y], checkpointIndex) => `
+              <circle
+                class="treasure-map-checkpoint${checkpointIndex < routeStep ? " is-visited" : ""}"
+                cx="${x}" cy="${y}" r="1.35"
+              />
+            `).join("")}
+            ${marker
+              ? `<circle class="treasure-map-marker" cx="${marker[0]}" cy="${marker[1]}" r="2.5"/>`
+              : ""}
+          </svg>
+        `;
+      }
+    ).join("");
 
     playerDiv.innerHTML = `
       <div class="player-name-bar">
@@ -3146,24 +3427,9 @@ function updateDisplay({ stampTreasurePlayerIndex = null } = {}) {
           role="img"
           aria-label="Treasures: ${player.treasures}"
         >
-          <svg class="treasure-map-icon" viewBox="0 0 32 32" aria-hidden="true" focusable="false"
-            style="--treasure-route-offset: ${treasureRouteOffset}; --treasure-route-start-offset: ${treasureRouteStartOffset}">
-            <path class="treasure-map-paper" d="M3.5 7.5 11 4l10 3 7.5-3v20.5L21 28l-10-3-7.5 3z"/>
-            <path d="M11 4v21M21 7v21" fill="none" stroke="#8c7b5a" stroke-width="1.3"/>
-            <path class="treasure-map-route" d="M7 21 11 17 15 11 21 14 26 8"/>
-            <path class="treasure-map-route-progress" pathLength="100" d="M7 21 11 17 15 11 21 14 26 8"/>
-            ${treasureCheckpoints.map(([x, y], checkpointIndex) => `
-              <circle
-                class="treasure-map-checkpoint${checkpointIndex < treasureRouteStep ? " is-visited" : ""}"
-                cx="${x}" cy="${y}" r="1.35"
-              />
-            `).join("")}
-            ${treasureMarker
-              ? `<circle class="treasure-map-marker" cx="${treasureMarker[0]}" cy="${treasureMarker[1]}" r="2.5"/>`
-              : ""}
-          </svg>
+          ${treasureMapsHTML}
           <span class="treasure-count-copy">
-            <strong class="treasure-count-number">${player.treasures}</strong>
+            <strong class="treasure-count-number">${treasureCountInWords(player.treasures)}</strong>
             <span class="treasure-count-label">Treasures</span>
           </span>
         </div>
@@ -3207,6 +3473,7 @@ function updateDisplay({ stampTreasurePlayerIndex = null } = {}) {
           <span class="stash-meter" aria-hidden="true">
             <span class="stash-meter-fill stash-meter-fill-gold"></span>
             <span class="stash-meter-fill stash-meter-fill-rich-gold"></span>
+            <span class="stash-meter-fill stash-meter-fill-dark-gold"></span>
           </span>
           <span class="stash-readout">
             <strong>${player.stash}</strong>
@@ -3251,7 +3518,11 @@ function updateDisplay({ stampTreasurePlayerIndex = null } = {}) {
 
     `;
 
-    updateStashMeter(playerDiv.querySelector('.stash-amount'), player.stash);
+    updateStashMeter(
+      playerDiv.querySelector('.stash-amount'),
+      player.stash,
+      player.curse?.cost
+    );
 
     playerDiv.addEventListener("click", event => {
       if (event.target instanceof Element &&
@@ -3288,7 +3559,7 @@ function updatePlayerStashDisplay(playerIndex) {
 
   stashValue.textContent = player.stash;
   stashAmount.setAttribute('aria-label', `Stash: ${player.stash}`);
-  updateStashMeter(stashAmount, player.stash);
+  updateStashMeter(stashAmount, player.stash, player.curse?.cost);
   removeButton.disabled = player.stash === 0;
 
   if (player.curse) {
@@ -3311,35 +3582,78 @@ function updatePlayerStashDisplay(playerIndex) {
         }
 
 function calculateScores() {
-  // 1) Build a summary for each player
-  const lines = players.map(p => {
-    // use finishRound if set, otherwise currentRound
-    const rounds = p.finishRound != null ? p.finishRound : currentRound;
-    const treasurePenalty = Math.floor(p.treasures / 2);
-    const score = rounds - treasurePenalty;
-    return `${p.name}: ${rounds} rounds – ${treasurePenalty} = ${score}`;
+  if (players.length === 0) {
+    showMessage('Add at least one player before calculating final scores.');
+    return;
+  }
+
+  const results = players
+    .map((player, playerIndex) => {
+      const rounds = player.finishRound != null ? player.finishRound : currentRound;
+      const treasures = player.treasures;
+      return {
+        name: player.name,
+        rounds,
+        treasures,
+        score: rounds - treasures,
+        playerIndex
+      };
+    })
+    .sort((first, second) => first.score - second.score || first.playerIndex - second.playerIndex);
+  const bestScore = results[0].score;
+  const winners = results.filter(result => result.score === bestScore);
+  const winnerText = winners.map(winner => escapeHTML(winner.name)).join(', ');
+  const entries = results.map((result, index) => `
+    <li class="score-results-entry${result.score === bestScore ? ' is-winner' : ''}">
+      <span class="score-results-player">
+        <span class="score-results-rank">${index + 1}.</span>${escapeHTML(result.name)}
+      </span>
+      <strong class="score-results-score" aria-label="Score ${result.score}">${result.score}</strong>
+      <span class="score-results-breakdown">
+        ${result.rounds} rounds − ${result.treasures} treasures
+      </span>
+    </li>
+  `).join('');
+
+  const backdrop = document.createElement('div');
+  backdrop.id = 'scoreResultsBackdrop';
+  backdrop.className = 'throw-ritual-backdrop score-results-backdrop';
+  backdrop.setAttribute('role', 'dialog');
+  backdrop.setAttribute('aria-modal', 'true');
+  backdrop.setAttribute('aria-labelledby', 'scoreResultsTitle');
+  backdrop.tabIndex = -1;
+  backdrop.addEventListener('click', event => {
+    if (event.target === backdrop) closeScoreResults();
   });
-
-  // 2) Find the lowest score
-  const scores = players.map(p => {
-    const rounds = p.finishRound != null ? p.finishRound : currentRound;
-    return rounds - Math.floor(p.treasures / 2);
+  backdrop.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeScoreResults();
+    } else if (event.key === 'Tab') {
+      event.preventDefault();
+      backdrop.querySelector('.score-results-close')?.focus();
+    }
   });
-  const best = Math.min(...scores);
-  const winners = players
-    .filter((p,i) => ( (p.finishRound!=null? p.finishRound:currentRound) - Math.floor(p.treasures/2) ) === best)
-    .map(p=>p.name)
-    .join(', ');
+  backdrop.innerHTML = `
+    <section class="throw-ritual score-results">
+      <button class="score-results-close" type="button" aria-label="Close final results"
+        onclick="closeScoreResults()">×</button>
+      <h2 class="throw-ritual-title" id="scoreResultsTitle">Final Results</h2>
+      <div class="score-results-trophy" aria-hidden="true">🏆</div>
+      <p class="score-results-winner">
+        ${winners.length === 1 ? 'Winner' : 'Winners'}: ${winnerText}
+      </p>
+      <p class="score-results-subtitle">Lowest score wins · rounds minus treasures</p>
+      <ol class="score-results-list">${entries}</ol>
+    </section>
+  `;
+  document.body.appendChild(backdrop);
+  backdrop.querySelector('.score-results-close')?.focus();
+}
 
-  // 3) Show it
-  showMessage(`
-    <p><strong>Final scores:</strong></p>
-    <p>${lines.join('<br>')}</p>
-    <p>🏆 Winner${winners.includes(',') ? 's' : ''}: ${winners}</p>
-  `);
-
-
-  showResult(html);
+function closeScoreResults() {
+  document.getElementById('scoreResultsBackdrop')?.remove();
+  document.getElementById('calculateScoresButton')?.focus();
 }
 
 
